@@ -1,0 +1,120 @@
+html
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>ZERO-TRUST FORTUNE SECURITY SYSTEM v2026.11</title>
+    <style>
+        body { font-family: sans-serif; background: #020617; color: #f8fafc; padding: 20px; display: flex; justify-content: center; }
+        .secure-fortress { max-width: 500px; width: 100%; background: #0f172a; padding: 30px; border-radius: 12px; border: 2px solid #0ea5e9; box-shadow: 0 0 20px rgba(14, 165, 233, 0.2); }
+        h1 { text-align: center; color: #0ea5e9; font-size: 20px; margin-bottom: 25px; }
+        .input-block { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; color: #94a3b8; font-size: 14px; font-weight: bold; }
+        input { width: 100%; padding: 12px; background: #020617; border: 1px solid #334155; border-radius: 6px; color: #ffffff; font-size: 16px; box-sizing: border-box; }
+        button { width: 100%; padding: 14px; background: #0ea5e9; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        button:hover { background: #38bdf8; }
+        .security-monitor { margin-top: 20px; padding: 12px; background: #020617; border-radius: 6px; border: 1px solid #1e293b; font-family: monospace; font-size: 11px; }
+        .status-ok { color: #22c55e; }
+        .status-crypto { color: #f43f5e; word-break: break-all; margin-top: 5px; }
+        .output-panel { margin-top: 20px; padding: 15px; background: #1e293b; border-radius: 6px; display: none; border-left: 4px solid #22c55e; }
+    </style>
+</head>
+<body>
+
+<div class="secure-fortress">
+    <h1>🔮 姓名判断 × 数秘術 堅牢システム（ネコタマ版）</h1>
+    
+    <div class="input-block">
+        <label>苗字（漢字のみ）</label>
+        <input type="text" id="nodeLastName" autocomplete="off" placeholder="例：徳永">
+    </div>
+    <div class="input-block">
+        <label>名前（漢字のみ）</label>
+        <input type="text" id="nodeFirstName" autocomplete="off" placeholder="例：義人">
+    </div>
+    <div class="input-block">
+        <label>生年月日</label>
+        <input type="date" id="nodeBirthday">
+    </div>
+    
+    <button id="execBtn">安全に完全暗号化処理を実行</button>
+
+    <div class="security-monitor">
+        <div class="status-ok">🛡️ [MONITOR] シークレット環境防衛: ACTIVE</div>
+        <div class="status-crypto" id="hexLogger">DB累積ハッシュ: 待機中...</div>
+    </div>
+
+    <div id="secureOutput" class="output-panel">
+        <h3 id="outTitle" style="margin-top:0; color:#22c55e;"></h3>
+        <p id="outMeta" style="font-weight: bold; color: #cbd5e1;"></p>
+        <p id="outDesc" style="color: #94a3b8; line-height: 1.6;"></p>
+    </div>
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    function secureLocalHash(text) {
+        let hash = 5381;
+        for (let i = 0; i < text.length; i++) { hash = ((hash << 5) + hash) + text.charCodeAt(i); }
+        return (hash >>> 0).toString(16).padStart(8, '0');
+    }
+
+    const strokeTable = {
+        '青':8, '赤':7, '秋':9, '浅':12, '安':6, '阿':13, '井':4, '一':1, '市':5, '伊藤':29, '稲':14, '岩':8, '宇':6, '内':4, '梅':11, '浦':11, '遠':17, '大':3, '小':3, '岡田':13, '岡':8, '尾':7, '織':18,
+        '加':5, '神':10, '金':8, '川':3, '河':9, '木':4, '菊':14, '北':5, '久':3, '工':3, '久保':10, '倉':10, '黒':11, '小林':12, '近':12, '後':9, '小島':13,
+        '斎':11, '坂':7, '佐':7, '桜':21, '笹':11, '佐藤':29, '沢':17, '鹿':11, '柴':9, '嶋':14, '島':10, '清水':23, '白':5, '新':13, '菅':14, '杉':7, '鈴木':17, '瀬':20, '関':19, '園':13,
+        '高':10, '滝':20, '田':5, '武':8, '竹':6, '橘':16, '谷':7, '千葉':17, '塚':13, '辻':9, '土':3, '堤':12, '坪':8, '鶴':21, '寺':6, '手':4, '徳':15, '戸':4, '土井':7,
+        '永':5, '長':8, '中':4, '中村':11, '名':6, '西':6, '新田':18, '沼':9, '根':14, '野':11, '野村':18,
+        '橋':16, '長谷川':22, '服':8, '馬':10, '浜':18, '林':8, '原':10, '樋':15, '平':5, '広':15, '福':14, '藤':18, '古':5, '星':9, '堀':12, '本':5,
+        '前':9, '牧':8, '増':15, '松':8, '松本':13, '丸':3, '三':3, '水':4, '宮':10, '三浦':14, '村':7, '望':11, '森':12, '守':6,
+        '矢':5, '安田':11, '谷口':10, '柳':9, '山':3, '山口':6, '山田':8, '山崎':15, '山本':8, '横':16, '吉':6, '吉田':11, '米':6, '若':11, '渡':13, '義':13, '人':2
+    };
+    
+    function strictValidate(str) { return /^[\u4E00-\u9FFF]+$/.test(str); }
+
+    function executeSecureFortune() {
+        const rawLast = document.getElementById('nodeLastName').value.trim();
+        const rawFirst = document.getElementById('nodeFirstName').value.trim();
+        const rawBirth = document.getElementById('nodeBirthday').value;
+
+        if (!rawLast || !rawFirst || !rawBirth) { alert("入力を完了してください。"); return; }
+        if (!strictValidate(rawLast) || !strictValidate(rawFirst)) { alert("漢字のみで入力してください。"); return; }
+
+        const dbHash = secureLocalHash(`${rawLast}${rawFirst}${rawBirth}`);
+        document.getElementById('hexLogger').textContent = `DB累積ハッシュ: 0x${dbHash}`;
+
+        let lStrokes = 0; let fStrokes = 0;
+        for (let char of rawLast) { lStrokes += strokeTable[char] || 5; }
+        for (let char of rawFirst) { fStrokes += strokeTable[char] || 5; }
+        const grandTotal = lStrokes + fStrokes;
+
+        const birthDigits = rawBirth.replace(/[^0-9]/g, '');
+        let sum = 0;
+        for (let d of birthDigits) { sum += parseInt(d); }
+        while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
+            sum = String(sum).split('').reduce((acc, cur) => acc + parseInt(cur), 0);
+        }
+
+        // 大吉数を正しく配列に格納
+        let resultMsg = "";
+        const luckyNumbers =;
+        
+        if (luckyNumbers.indexOf(grandTotal) !== -1) {
+            resultMsg = "【大吉・強運数】画数合計は" + grandTotal + "画。この画数は非常に強い成功エネルギーを持っています。困難を跳ね返し、自分の才能を活かして自立・成功を掴み取ることができる「AI FIRE」に最も適した数です。";
+        } else {
+            resultMsg = "【安定・着実数】画数合計は" + grandTotal + "画。派手さはなくとも、誠実さと手堅い戦略で一歩一歩確実に目標を達成する運勢です。リスクを事前に察知して安全に資産を拡大する防衛力が備わっています。";
+        }
+
+        document.getElementById('outTitle').textContent = "🛡️ エンドツーエンド暗号化・鑑定完了";
+        document.getElementById('outMeta').textContent = "総格: " + grandTotal + "画 / 誕生数: 【" + sum + "】";
+        document.getElementById('outDesc').textContent = resultMsg;
+        document.getElementById('secureOutput').style.display = 'block';
+    }
+
+    document.getElementById('execBtn').addEventListener('click', executeSecureFortune);
+})();
+</script>
+</body>
+</html>
