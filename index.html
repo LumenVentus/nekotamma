@@ -88,7 +88,6 @@
         25: "観鬱籬",
         29: "鬱"
     };
-
     const strokeMap = Object.create(null);
     for (const [strokesStr, chars] of Object.entries(RAW_STROKE_GROUPS)) {
         const count = Number(strokesStr);
@@ -167,44 +166,59 @@
         return "【解析結果】" + part1[s1] + part2[s2] + part3[s3];
     }
 
-    function showError(msg) {const errBox = document.getElementById('errorBox');
-errBox.textContent = msg;
-errBox.style.display = 'block';
-document.getElementById('secureOutput').style.display = 'none';
-}
-function executeSecureFortune() {
-const errBox = document.getElementById('errorBox');
-errBox.style.display = 'none';
-const rawLast = document.getElementById('nodeLastName').value.trim();
-const rawFirst = document.getElementById('nodeFirstName').value.trim();
-const rawBirth = document.getElementById('nodeBirthday').value;
-if (!rawLast || !rawFirst || !rawBirth) {
-showError("苗字・名前・生年月日をすべて入力してください。");
-return;
-}
-if (!VALID_NAME_REGEX.test(rawLast) || !VALID_NAME_REGEX.test(rawFirst)) {
-showError("使用できない文字が含まれています。漢字・ひらがな・カタカナで入力してください。");
-return;
-}
-const lastResult = calculateNameStrokes(rawLast);
-if (lastResult.error) { showError("苗字エラー: " + lastResult.error); return; }
-const firstResult = calculateNameStrokes(rawFirst);
-if (firstResult.error) { showError("名前エラー: " + firstResult.error); return; }
-const grandTotal = lastResult.total + firstResult.total;
-const birthDigits = rawBirth.replace(/[^0-9]/g, '');
-let sum = 0;
-for (const d of birthDigits) { sum += Number(d); }
-while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
-sum = String(sum).split('').reduce((acc, cur) => acc + Number(cur), 0);
-}
-const volatileSeed = computeVolatileSeed(${rawLast}:${rawFirst}:${rawBirth});
-const resultMsg = generateFortuneMessage(volatileSeed, grandTotal, sum);
-executionCount += 1;
-document.getElementById('execCounter').textContent = String(executionCount);
-document.getElementById('outTitle').textContent = "🛡️ 鑑定完了（ゼロ・データ保持モード）";
-document.getElementById('outMeta').textContent = 総格: ${grandTotal}画（苗字 ${lastResult.total}画 ＋ 名前 ${firstResult.total}画） / 誕生数: 【${sum}】;
-document.getElementById('outDesc').textContent = resultMsg;
-document.getElementById('secureOutput').style.display = 'block';
-}
-document.getElementById('execBtn').addEventListener('click', executeSecureFortune);
+    function showError(msg) {
+        const errBox = document.getElementById('errorBox');
+        errBox.textContent = msg;
+        errBox.style.display = 'block';
+        document.getElementById('secureOutput').style.display = 'none';
+    }
+
+    function executeSecureFortune() {
+        const errBox = document.getElementById('errorBox');
+        errBox.style.display = 'none';
+
+        const rawLast = document.getElementById('nodeLastName').value.trim();
+        const rawFirst = document.getElementById('nodeFirstName').value.trim();
+        const rawBirth = document.getElementById('nodeBirthday').value;
+
+        if (!rawLast || !rawFirst || !rawBirth) {
+            showError("苗字・名前・生年月日をすべて入力してください。");
+            return;
+        }
+        if (!VALID_NAME_REGEX.test(rawLast) || !VALID_NAME_REGEX.test(rawFirst)) {
+            showError("使用できない文字が含まれています。漢字・ひらがな・カタカナで入力してください。");
+            return;
+        }
+
+        const lastResult = calculateNameStrokes(rawLast);
+        if (lastResult.error) { showError("苗字エラー: " + lastResult.error); return; }
+
+        const firstResult = calculateNameStrokes(rawFirst);
+        if (firstResult.error) { showError("名前エラー: " + firstResult.error); return; }
+
+        const grandTotal = lastResult.total + firstResult.total;
+
+        const birthDigits = rawBirth.replace(/[^0-9]/g, '');
+        let sum = 0;
+        for (const d of birthDigits) { sum += Number(d); }
+        while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
+            sum = String(sum).split('').reduce((acc, cur) => acc + Number(cur), 0);
+        }
+
+        const volatileSeed = computeVolatileSeed(`${rawLast}:${rawFirst}:${rawBirth}`);
+        const resultMsg = generateFortuneMessage(volatileSeed, grandTotal, sum);
+
+        executionCount += 1;
+        document.getElementById('execCounter').textContent = String(executionCount);
+
+        document.getElementById('outTitle').textContent = "🛡️ 鑑定完了（ゼロ・データ保持モード）";
+        document.getElementById('outMeta').textContent = `総格: ${grandTotal}画（苗字 ${lastResult.total}画 ＋ 名前 ${firstResult.total}画） / 誕生数: 【${sum}】`;
+        document.getElementById('outDesc').textContent = resultMsg;
+        document.getElementById('secureOutput').style.display = 'block';
+    }
+
+    document.getElementById('execBtn').addEventListener('click', executeSecureFortune);
 })();
+</script>
+</body>
+</html>
