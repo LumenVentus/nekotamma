@@ -32,7 +32,7 @@
     </div>
     <div class="input-block">
         <label for="nodeFirstName">名前（漢字・ひらがな・カタカナ）</label>
-        <input type="text" id="nodeFirstName" autocomplete="off" spellcheck="false" maxlength="15" placeholder="例：朱美">
+        <input type="text" id="nodeFirstName" autocomplete="off" spellcheck="false" maxlength="15" placeholder="例：吉杜">
     </div>
     <div class="input-block">
         <label for="nodeBirthday">生年月日</label>
@@ -61,165 +61,12 @@
     let executionCount = 0;
 
     const RAW_STROKE_GROUPS = {
-        1:  ["一乙丶ノ亅ー丨"],
-        2:  ["二丁七九了二人入八力十卜又乃刀匕厂匚刂"],
-        3:  ["くしつへりレコソノヘリレン三丈上下丸久才千口土士夕大女子寸小山川工己干弓巾广丸万与亡凡刃勺"],
-        4:  ["いこてにひふみよをんイカキクケスセタチトニヌネハヒフマミムメモノユヨラリルレロワン五六円天日月中水火木王太文方心手毛気片牛犬牙王瓦甘生用田白皮皿目矛矢石示禾穴立"],
-        5:  ["あえおきすせそちぬねのはほまむめもらるれろがぎぐざじずぜぞだぢづでどばびぶべぼアウエオサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ永本正田白石立目生用矢示禾穴四瓜瓦甘皮皿矛"],
-        6:  ["うかなやゆわぁぃぅぇぉっゃゅょゎゥカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンァィゥェォッャュョヮ朱安伊宇江岡加吉久共曲光交合好行西早州舟色全先多竹地池虫兆年百名有羽自至舌舛舟艮色虍虫血行衣西"],
-        7:  ["がぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ赤佐坂杉谷村男町足体弟図声売麦来里良見角言豆豕豸貝走身車辛辰酉釆杜"],
-        8:  ["ぱぴぷぺぽパピプペポ青岩岡金長林松武服牧岸京協近具空国固昆使始姉実社者周宗招承昇昭松沼状性政青斉昔析切折浅戦選然争相送息速存村他打対待代第題炭短談着注柱昼町長鳥朝直通追定底的典店点転徒努灯堂働特毒独届南難二肉日入乳尿任認熱念脳納能波派破敗倍博畑八発反坂板返販飯飛費美鼻必氷表秒病品負部服福物分文聞平兵別変辺便包放法望牧北木本毎妹枚幕末万満味未脈民務無迷鳴面綿毛木目問門夜野役約薬由油有勇予余容洋葉陽様欲浴来落乱卵覧利里理陸立律略流留粒旅両料良力緑林輪類冷例歴列連練老労録論和話"],
-        9:  ["美秋河後柴星前柳南春海音風草茶昼食首飛香馬骨高鬼魚鳥鹿麦麻黄黍黒"],
-        10: ["神高倉島原宮馬谷栗桂桐桑桜梅桃梨柿柳株根格校案栽框栖桁桃案桑桜桟梅梓梗條梢梧梨梭梯械梱棄棋棒棚棟森棺椅植検業極楽概構様槽標模権横樹橋機"],
-        11: ["浅梅浦黒笹鹿野望若斎堀菊崎常清深理琉梨章笛第紺細終組経絵統続絹総緑線編練縁縄縦縮績繁繊織"],
-        12: ["堤堀森渡晴智翔陽結絢絵貴景暁晶暑暖暗暮暴暦曇曜"],
-        13: ["阿園新塚渡義愛聖詩誠裕靖豊夢照福禄禅離電雷零霧露"],
-        14: ["徳稲菊嶋菅根福綾嘉歌管精製説聡総増蔵造像態対端徴嫡暢肇綴適鉄模舞暮膜慢漫網紋様領緑瑠歴連練"],        15: ["樋広増輝慶賢駒賜質趣潤醇遵賞憧震影縁鋭閲横稼餓確潟褐歓緩器儀戯擬窮墟勲憬稽潔権憲検謙顕請諸線談調適敵徹踏熱練論"],
-        16: ["橘橋横樹機龍竜薫賢興鋼錯餐儒獣縦親静整積選操曇濃薄繁避壁磨麺融頼隣歴録館学器激県憲験興築燈薬輸"],
-        17: ["遠沢滝千葉優講謝謙購懇擦繊霜聴鍋翼療齢環韓館擬償礁縮績総鍛聴翼"],
-        18: ["織新田野村浜藤観顔騎鏡簡職礎騒贈題鎮闘難藩翻繭離類糧額顎曜礼"],
-        19: ["関瀬鏡願繰警鯨識贈懲爆譜簿霧離麗羅響獣瀬藤藩爆霧"],
-        20: ["滝厳懸競護釈譲醸籍騰党竇飄魔露議競護醸鐘騰露"],
-        21: ["桜鶴顧護魔躍蘭欄覧艦顧鶴魔躍露"],
-        22: ["長谷川鑑歓驚襲権響摂読囊彎鑑驚襲響摂"],
-        23: ["清水顕験恋変顕験恋変"],
-        24: ["鷹鱗譲醸鷹鱗"],
-        25: ["観鬱籬観"],
-        29: ["鬱"]
+        1: ["一乙丶ノ亅ー丨"],
+        2: ["二丁七九了二人入八力十卜又乃刀匕厂匚刂"],
+        3: ["くしつへりレコソノヘリレン三丈上下丸久才千口土士夕大女子寸小山川工己干弓巾广万与亡凡刃勺"],
+        4: ["いこてにひふみよをんイカキクケスセタチトニヌネハヒフマミムメモノユヨラリルレロワン五六円天日月中水火木王太文方心手毛気片牛犬牙瓦甘生用田白皮皿目矛矢石示禾穴立内今公分切友匹午反双太夫少引心戸支斗斤比氏爪父片牙牛犬王元井勿尤"],
+        5: ["あえおきすせそちぬねのはほまむめもらるれろがぎぐざじずぜぞだぢづでどばびぶべぼアウエオサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ永本正四瓜且世丘主乍乏乎仕付仙代令以兄冊写冬処出功加包北半占去古句可台史右号司央失奴尻左巧巨市布平幼庁広必打払斥旦旧未末札母民氷犯玄玉甘生用田由甲申白皮皿目矛矢石示禾穴立辺込"],
+        6: ["うかなやゆわぁぃぅぇぉっゃゅょゎゥカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンァィゥェォッャュョヮ朱安伊宇江岡加吉久共曲光交合好行西早州舟色全先多竹地池虫兆年百名有羽自至舌舛艮虍血衣丞両並乖乱乳事亜享京亮人仁今介仏仕他付仙代令以仮仰仲件任企伏伐休会伝伯伴伸伺似但位低住佐体何余作佳併使例侍供依価侮侯侵便係促俊俗保信修俳俵俸俺倉個倍倒候借倣値倫倹偉偏停健側偶傍傑備催傭傲伝債傷傾働像僕僚偽僧価儀億儒償優元兄充兆先光克免児党入全八公六共兵具典兼内円冊再冒冗冠冬冷准凍凝凡処凶出刀分切刊刑列初判別利到制刷券刺刻則削前剖剛剣剤副剰割創劇力功加助努励労効勅勇勉動勘務勝募勢勤勧勲"],
+        7: ["がぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ赤佐坂杉谷村男町足体弟図声売麦来里良見角言豆豕豸貝走身車辛辰酉釆杜作住低位余利助努労医君吹呈呉告吸周味呼命和固国坂均坊坑坪垂型埋城域執培基堂堅堆堕堤堪報場堺塊塑塗塚塩填塾境墓増墜墨墳墾壁壇壊壌士壮声壱売変夏夕外多夜夢大天太夫央失奇奈奉奏契奔奥奨奪女好如妃妄妊妙妥妨妹妻姉始姓委姫姻姿威娘娯娠婆婚婦婿媒媛嫁嫌嫡嬢子孔字存孝季学孫宅宇守安完宗官宙定宜宝実客宣室宮宰害宴宵家容宿寂寄密富寒寛寝察寡寧審寮寸寺対寿封専射将尉尊尋導小少尚就尺尼尽尾尿局居屈届屋展属層山岐岩岸峠峰島峡崇崎崩川州巡工左巧巨差己巻市布希師席帯帰帳常帽幅幕干平年幸幹幻幼幽幾庁広床序底店府度座庫庭庶康庸廃廉廊延建弁弄弊式弓引弟弦弧弱張強弾当形彩彫影役彼往征待律後徒従得御復循微徳徴徹心必忌忍志忘忙応忠快念怒怖思怠急性怨怪恋恐恒恥恨恩恭息恵悔悟悠患悦悩悪悲悼情惑惜惨惰想愁愉意愚愛感慈態慌慎慕慢慣慨慮慰慶憂憎憤憩憲憶憾懇応懲懐懸恋"],
+        8: ["ぱぴぷぺぽパピプペポ青岩岡金長林松武服牧岸京協近具空国固昆使始姉実社者周宗招承昇昭松沼状性政斉昔析切折浅戦選然争相送息速存村他打対待代第題炭短談着注柱昼町長鳥朝直通追定底的典店点転徒努灯堂働特毒独届南難二肉日入乳尿任認熱念脳納能波派破敗倍博畑八発反坂板返販飯飛費美鼻必氷表秒病品負部服福物分文聞平兵別変辺便包放法望牧北木本毎妹枚幕末万満味未脈民務無迷鳴面綿毛目問門夜野役約薬由油有勇予余容洋葉陽様欲浴来落乱卵覧利里理陸立律略流留粒旅両料良力緑林輪類冷例歴列連練老労録論和話"]
     };
-    const strokeMap = Object.create(null);
-    for (const [strokesStr, chunks] of Object.entries(RAW_STROKE_GROUPS)) {
-        const count = Number(strokesStr);
-        for (const chunk of chunks) {
-            for (const char of Array.from(chunk)) {
-                strokeMap[char] = count;
-            }
-        }
-    }
-    Object.freeze(strokeMap);
-
-    const VALID_NAME_REGEX = /^[\u3041-\u3096\u309D\u309E\u30A1-\u30FA\u30FC-\u30FE\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\u3005]+$/;
-
-    function calculateNameStrokes(nameStr) {
-        const chars = Array.from(nameStr);
-        let total = 0;
-        let prevStroke = 0;
-        const unknownChars = [];
-
-        for (let i = 0; i < chars.length; i++) {
-            const ch = chars[i];
-            if (ch === '々' || ch === 'ゝ' || ch === 'ゞ' || ch === 'ヽ' || ch === 'ヾ') {
-                if (prevStroke === 0) {
-                    return { error: `先頭に踊り字「${ch}」は使用できません。` };
-                }
-                total += prevStroke;
-            } else {
-                const s = strokeMap[ch];
-                if (typeof s !== 'number') {
-                    unknownChars.push(ch);
-                } else {
-                    total += s;
-                    prevStroke = s;
-                }
-            }
-        }
-
-        if (unknownChars.length > 0) {
-            return { error: `未登録の漢字が含まれています（${unknownChars.join('、')}）。` };
-        }
-        return { total };
-    }
-
-    function computeVolatileSeed(text) {
-        let hash = 5381;
-        for (let i = 0; i < text.length; i++) {
-            hash = ((hash << 5) + hash) + text.charCodeAt(i);
-        }
-        return (hash >>> 0);
-    }
-
-    function generateFortuneMessage(seed, totalStrokes, birthNum) {
-        const s1 = seed % 4;
-        const s2 = (seed >>> 2) % 4;
-        const s3 = (seed >>> 4) % 4;
-
-        const part1 = [
-            `固有特性値は${totalStrokes}画をベースとし、`,
-            `算出された総格${totalStrokes}画の波動エネルギーは、`,
-            `固有識別コード${totalStrokes}画に秘められた性質は、`,
-            `基盤データ${totalStrokes}画から解析された資質は、`
-        ];
-
-        const part2 = [
-            `入力された名前の構成から「完璧な調和」とスマートな処理能力を示しています。`,
-            `名前の文字列が持つ独自の周波数が、リスクを事前に察知する強力な直感力を生み出しています。`,
-            `文字の組み合わせそのものが独立心と強い自己防衛力を引き出す特殊な配列です。`,
-            `内に秘めた爆発的なポテンシャルと、堅実な資産防衛のバランスが非常に上手く取れています。`
-        ];
-
-        const part3 = [
-            `数秘術から導かれた誕生数【${birthNum}】の加護により、困難な局面でも常に最適なルートを選び取る適性が極めて高く現れています。`,
-            `誕生数【${birthNum}】との複合解析の結果、地道な努力が大きな成果の拡大へと繋がる、確実性の高い防衛戦術がベストです。`,
-            `天命数【${birthNum}】が示す未来予測では、自分の直感を信じて行動することで、周囲を圧倒する成功と自立を掴み取る運命にあります。`,
-            `運命数【${birthNum}】の防衛シールドがアクティブになっており、予期せぬトラブルをすべてチャンスへと変換する強運を持っています。`
-        ];
-
-        return "【解析結果】" + part1[s1] + part2[s2] + part3[s3];
-    }
-
-    function showError(msg) {
-        const errBox = document.getElementById('errorBox');
-        errBox.textContent = msg;
-        errBox.style.display = 'block';
-        document.getElementById('secureOutput').style.display = 'none';
-    }
-
-    function executeSecureFortune() {
-        const errBox = document.getElementById('errorBox');
-        errBox.style.display = 'none';
-
-        const rawLast = document.getElementById('nodeLastName').value.trim();
-        const rawFirst = document.getElementById('nodeFirstName').value.trim();
-        const rawBirth = document.getElementById('nodeBirthday').value;
-
-        if (!rawLast || !rawFirst || !rawBirth) {
-            showError("苗字・名前・生年月日をすべて入力してください。");
-            return;
-        }
-        if (!VALID_NAME_REGEX.test(rawLast) || !VALID_NAME_REGEX.test(rawFirst)) {
-            showError("使用できない文字が含まれています。漢字・ひらがな・カタカナで入力してください。");
-            return;
-        }
-
-        const lastResult = calculateNameStrokes(rawLast);
-        if (lastResult.error) { showError("苗字エラー: " + lastResult.error); return; }
-
-        const firstResult = calculateNameStrokes(rawFirst);
-        if (firstResult.error) { showError("名前エラー: " + firstResult.error); return; }
-
-        const grandTotal = lastResult.total + firstResult.total;
-
-        const birthDigits = rawBirth.replace(/[^0-9]/g, '');
-        let sum = 0;
-        for (const d of birthDigits) { sum += Number(d); }
-        while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
-            sum = String(sum).split('').reduce((acc, cur) => acc + Number(cur), 0);
-        }
-
-        const volatileSeed = computeVolatileSeed(`${rawLast}:${rawFirst}:${rawBirth}`);
-        const resultMsg = generateFortuneMessage(volatileSeed, grandTotal, sum);
-
-        executionCount += 1;
-        document.getElementById('execCounter').textContent = String(executionCount);
-
-        document.getElementById('outTitle').textContent = "🛡️ 鑑定完了（ゼロ・データ保持モード）";
-        document.getElementById('outMeta').textContent = `総格: ${grandTotal}画（苗字 ${lastResult.total}画 ＋ 名前 ${firstResult.total}画） / 誕生数: 【${sum}】`;
-        document.getElementById('outDesc').textContent = resultMsg;
-        document.getElementById('secureOutput').style.display = 'block';
-    }
-
-    document.getElementById('execBtn').addEventListener('click', executeSecureFortune);
-})();
-</script>
-</body>
-</html>
