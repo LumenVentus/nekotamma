@@ -2,51 +2,55 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>ZERO-TRUST FORTUNE SECURITY SYSTEM v2026.11</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none';">
+    <meta name="referrer" content="no-referrer">
+    <title>ZERO-TRUST FORTUNE SYSTEM v2026.11</title>
     <style>
-        body { font-family: sans-serif; background: #020617; color: #f8fafc; padding: 20px; display: flex; justify-content: center; }
-        .secure-fortress { max-width: 500px; width: 100%; background: #0f172a; padding: 30px; border-radius: 12px; border: 2px solid #0ea5e9; box-shadow: 0 0 20px rgba(14, 165, 233, 0.2); }
-        h1 { text-align: center; color: #0ea5e9; font-size: 20px; margin-bottom: 25px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #020617; color: #f8fafc; padding: 20px; display: flex; justify-content: center; margin: 0; }
+        .secure-fortress { max-width: 500px; width: 100%; background: #0f172a; padding: 30px; border-radius: 12px; border: 2px solid #0ea5e9; box-shadow: 0 0 24px rgba(14, 165, 233, 0.25); box-sizing: border-box; }
+        h1 { text-align: center; color: #0ea5e9; font-size: 20px; margin: 0 0 25px 0; letter-spacing: 0.05em; }
         .input-block { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; color: #94a3b8; font-size: 14px; font-weight: bold; }
-        input { width: 100%; padding: 12px; background: #020617; border: 1px solid #334155; border-radius: 6px; color: #ffffff; font-size: 16px; box-sizing: border-box; }
-        button { width: 100%; padding: 14px; background: #0ea5e9; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        input { width: 100%; padding: 12px; background: #020617; border: 1px solid #334155; border-radius: 6px; color: #ffffff; font-size: 16px; box-sizing: border-box; transition: border-color 0.2s; }
+        input:focus { outline: none; border-color: #0ea5e9; }
+        button { width: 100%; padding: 14px; background: #0ea5e9; color: #ffffff; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
         button:hover { background: #38bdf8; }
-        .security-monitor { margin-top: 20px; padding: 12px; background: #020617; border-radius: 6px; border: 1px solid #1e293b; font-family: monospace; font-size: 11px; }
-        .status-ok { color: #22c55e; }
-        .status-crypto { color: #f43f5e; word-break: break-all; margin-top: 5px; }
-        .output-panel { margin-top: 20px; padding: 15px; background: #1e293b; border-radius: 6px; display: none; border-left: 4px solid #0ea5e9; }
+        .counter-monitor { margin-top: 20px; padding: 12px; background: #020617; border-radius: 6px; border: 1px solid #1e293b; font-family: monospace; font-size: 13px; text-align: center; color: #38bdf8; }
+        .output-panel { margin-top: 20px; padding: 18px; background: #1e293b; border-radius: 6px; display: none; border-left: 4px solid #0ea5e9; }
+        .error-panel { margin-top: 15px; padding: 12px; background: #450a0a; border: 1px solid #ef4444; border-radius: 6px; color: #fca5a5; font-size: 13px; display: none; }
     </style>
 </head>
 <body>
 
 <div class="secure-fortress">
-    <h1>🔮 姓名判断 × 誕生日占い </h1>
+    <h1>🔮 姓名判断 × 誕生日占い</h1>
     
     <div class="input-block">
-        <label>苗字（漢字のみ）</label>
-        <input type="text" id="nodeLastName" autocomplete="off" placeholder="例：日本">
+        <label for="nodeLastName">苗字（漢字・ひらがな・カタカナ）</label>
+        <input type="text" id="nodeLastName" autocomplete="off" spellcheck="false" maxlength="15" placeholder="例：徳永">
     </div>
     <div class="input-block">
-        <label>名前（漢字のみ）</label>
-        <input type="text" id="nodeFirstName" autocomplete="off" placeholder="例：花子">
+        <label for="nodeFirstName">名前（漢字・ひらがな・カタカナ）</label>
+        <input type="text" id="nodeFirstName" autocomplete="off" spellcheck="false" maxlength="15" placeholder="例：朱美">
     </div>
     <div class="input-block">
-        <label>生年月日</label>
-        <input type="date" id="nodeBirthday">
+        <label for="nodeBirthday">生年月日</label>
+        <input type="date" id="nodeBirthday" min="1900-01-01" max="2099-12-31">
     </div>
     
-    <button id="execBtn"> 占ってみる</button>
+    <button id="execBtn" type="button">占ってみる</button>
 
-    <div class="security-monitor">
-        <div class="status-ok">🛡️ [MONITOR] シークレット環境防衛: ACTIVE</div>
-        <div class="status-crypto" id="hexLogger">DB累積ハッシュ: 待機中...</div>
+    <div id="errorBox" class="error-panel" role="alert"></div>
+
+    <div class="counter-monitor">
+        📊 占い実行累計数: <strong id="execCounter">0</strong> 回
     </div>
 
     <div id="secureOutput" class="output-panel">
-        <h3 id="outTitle" style="margin-top:0; color:#0ea5e9;"></h3>
-        <p id="outMeta" style="font-weight: bold; color: #cbd5e1;"></p>
-        <p id="outDesc" style="color: #94a3b8; line-height: 1.6;"></p>
+        <h3 id="outTitle" style="margin:0 0 10px 0; color:#0ea5e9; font-size:16px;"></h3>
+        <p id="outMeta" style="font-weight: bold; color: #e2e8f0; margin: 0 0 10px 0;"></p>
+        <p id="outDesc" style="color: #cbd5e1; line-height: 1.7; margin: 0; font-size: 14px;"></p>
     </div>
 </div>
 
@@ -54,31 +58,90 @@
 (function() {
     'use strict';
 
-    function secureLocalHash(text) {
-        let hash = 5381;
-        for (let i = 0; i < text.length; i++) { hash = ((hash << 5) + hash) + text.charCodeAt(i); }
-        return (hash >>> 0).toString(16).padStart(8, '0');
+    let executionCount = 0;
+
+    const RAW_STROKE_GROUPS = {
+        1:  "一乙丶ノ亅ー丨",
+        2:  "二丁七九了二人入八力十卜又乃刀匕厂匚刂",
+        3:  "くしつへりレコソノヘリレン三丈上下丸久才千口土士夕大女子寸小山川工己干弓巾广丸万与亡凡刃勺",
+        4:  "いこてにひふみよをんイカキクケスセタチトニヌネハヒフマミムメモノユヨラリルレロワン五六円天日月中水火木王太文方心手毛気片牛犬牙王瓦甘生用田白皮皿目矛矢石示禾穴立",
+        5:  "あえおきすせそちぬねのはほまむめもらるれろがぎぐざじずぜぞだぢづでどばびぶべぼアウエオサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ永本正田白石立目生用矢示禾穴四瓜瓦甘皮皿矛",
+        6:  "うかなやゆわぁぃぅぇぉっゃゅょゎゥカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンァィゥェォッャュョヮ朱安伊宇江岡加吉久共曲光交合好行西早州舟色全先多竹地池虫兆年百名有羽自至舌舛舟艮色虍虫血行衣西",
+        7:  "がぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ赤佐坂杉谷村男町足体弟図声売麦来里良見角言豆豕豸貝走身車辛辰酉釆",
+        8:  "ぱぴぷぺぽパピプペポ青岩岡金長林松武服牧岸京協近具空国固昆使始姉実社者周宗招承昇昭松沼状性政青斉昔析切折浅戦選然争相送息速存村他打対待代第題炭短談着注柱昼町長鳥朝直通追定底的典店点転徒努灯堂働特毒独届南難二肉日入乳尿任認熱念脳納能波派破敗倍博畑八発反坂板返販飯飛費美鼻必氷表秒病品負部服福物分文聞平兵別変辺便包放法望牧北木本毎妹枚幕末万満味未脈民務無迷鳴面綿毛木目問門夜野役約薬由油有勇予余容洋葉陽様欲浴来落乱卵覧利里理陸立律略流留粒旅両料良力緑林輪類冷例歴列連練老労録論和話",
+        9:  "美秋河後柴星前柳南春海音風草茶昼食首飛香馬骨高鬼魚鳥鹿麦麻黄黍黒",
+        10: "神高倉島原宮馬谷栗桂桐桑桜梅桃梨柿柳株根格校案栽框栖桁桃案桑桜桟梅梓梗條梢梧梨梭梯械梱棄棋棒棚棟森棺椅植検業極楽概構様槽標模権横樹橋機",
+        11: "浅梅浦黒笹鹿野望若斎堀菊崎常清深理琉梨章笛第紺細終組経絵統続絹総緑線編練縁縄縦縮績繁繊織",
+        12: "堤堀森渡晴智翔陽結絢絵貴景暁晶暑暖暗暮暴暦曇曜",
+        13: "阿園新塚渡義愛聖詩誠裕靖豊夢照福禄禅離電雷零霧露",
+        14: "徳稲菊嶋菅根福綾嘉歌管精製説聡総増蔵造像態対端徴嫡暢肇綴適鉄模舞暮膜慢漫網紋様領緑瑠歴連練",
+        15: "樋広増輝慶賢駒賜質趣潤醇遵賞憧震影縁鋭閲横稼餓確潟褐歓緩器輝儀戯擬窮墟勲慶憬稽潔賢権憲検謙顕固孤弧誇鼓互呉娯悟御交効勾厚口向后喉坑垢好孔孝宏工巧巷幸広康弘恒慌抗拘控攻昂晃更杭校梗構江洪浩港溝甲皇硬稿糠紅絞綱耕考肯肱腔膏航荒行衡講貢購郊酵鉱鋼降項香高鴻剛劫号合壕拷豪克刻告国穀酷黒獄腰骨駒込頃今困墾婚恨懇昏昆根梱混紺魂佐唆左差査沙瑳砂詐鎖裟坐座挫債催再最哉塞妻宰彩才採栽歳済災采犀砕砦祭斎細菜裁載際剤在材罪財冴坂阪堺榊肴咲崎埼碕鷺作削咋搾昨策索錯桜鮭笹匙冊刷察撮擦札殺薩雑皐鯖捌錆鮫皿晒三傘参山惨撒散桟燦珊産算纂蚕讃賛酸餐斬暫残仕仔伺使刺司史嗣四士始姉姿子屍市師志思指支孜斯施旨枝止死氏獅祉私糸紙紫肢脂至視詞詩試誌諮資賜雌飼歯事似侍児字寺慈持時次滋治爾璽痔磁示而耳自蒔辞汐鹿式識鴫竺軸宍雫七叱執失嫉室悉湿漆疾質実蔀篠偲柴芝屡蕊縞舎写射捨赦斜煮社紗者謝車遮蛇邪借勺尺杓灼爵酌釈錫若寂弱惹主取守手朱殊狩珠種趣酒首儒受呪寿授樹綬需囚収周宗就州修愁拾洲秀秋終繍習臭舟蒐衆襲讐蹴輯週酋酬集醜什住充十従戎柔汁渋獣縦重銃叔夙宿淑祝縮粛塾熟出術述俊峻春瞬竣舜駿准循旬楯殉淳準潤盾純巡遵醇順処初所暑曙渚庶緒署書薯藷諸助叙女序徐恕鋤除傷償勝匠升召哨商唱嘗奨妾娼宵将小少尚庄床廠彰承抄招掌捷昇昌昭晶松梢樟樵沼消渉湘焼焦照症省硝礁祥称章笑粧紹肖菖蒋蕉衝裳訟証詔詳象賞醤鉦鍾鐘障鞘上丈丞乗冗剰城場壌嬢常情条杖浄状畳穣蒸譲醸錠嘱埴飾拭植殖燭織職色触食辱尻伸信侵唇娠寝審心慎振新晋森榛浸透深申疹真神秦紳臣芯薪親診身辛進針震人仁刃塵壬尋甚尽腎訊迅陣靭笥諏須酢図厨逗吹垂帥推水炊睡粋翠衰遂酔錐錘随瑞髄崇嵩数枢趨雛据杉椙澄摺寸世瀬畝是凄制勢姓征性成政整星晴棲栖正清牲生盛精聖声製西誠誓請逝醒青静斉税脆隻席惜戚斥昔析石積籍績脊責赤跡蹟碩切拙接摂折設窃節説雪絶舌蝉仙先千占宣専尖川戦扇撰栓栴泉浅洗染潜煎煽旋穿箭線繊羨腺舛船薦詮賎践選遷銭銑閃鮮前善漸然全禅繕膳糎塑岨措曾曽楚狙疏疎礎祖租粗素組蘇訴阻遡鼠僧創双叢倉喪壮奏爽宋層匝惣想捜掃挿掻操早曹巣槍槽漕燥争痩相窓糟総綜草荘葬蒼藻装走送遭鎗霜騒像増憎臓蔵贈造促側則即息捉束測足速俗属賊族続卒袖其揃存孫尊損村遜他多太汰詑唾堕妥惰打柁舵楕陀駄騨体堆対耐岱帯待怠態戴替泰滞胎腿苔袋貸退逮隊黛鯛代台大第醍題鷹滝瀧卓啄宅托択拓沢濯琢託鐸濁諾茸凧蛸只叩但達辰奪脱巽竪辿棚谷狸鱈樽誰丹単嘆坦担探旦歎淡湛炭短端箪綻耽胆蛋誕鍛団壇弾断暖檀段男談値知地弛恥智池痴稚置致蜘遅馳築畜竹筑蓄逐秩窒茶嫡着中仲宙忠抽昼柱注虫衷註酎鋳駐樗瀦猪苧著貯丁兆凋喋寵帖帳庁弔張彫徴懲挑暢朝潮牒町眺聴脹腸蝶調諜超跳銚長頂鳥勅捗直朕沈珍賃鎮陳津墜椎槌追鎚痛通塚栂掴槻佃漬柘辻蔦綴鍔椿潰坪壷嬬紬爪吊釣鶴亭低停偵剃貞呈堤定帝底庭廷弟悌抵挺提梯汀碇禎程締艇訂諦蹄逓邸鄭釘鼎泥摘擢敵滴的笛適鏑溺哲徹撤轍迭鉄典填天展店添纏甜貼転顛点伝殿澱田電兎吐堵塗妬屠徒斗杜渡登菟賭途都鍍砥努度土奴怒倒党冬凍刀唐塔塘套宕島嶋悼投搭東桃梼棟盗淘湯涛灯燈当痘祷等答筒糖統到董蕩藤討謄豆踏逃透鐙陶頭騰闘働動同堂導憧撞洞瞳童胴萄道銅峠鴇匿得徳涜特督禿篤毒独読栃橡凸突椴届鳶苫寅酉瀞噸屯惇敦沌豚遁頓吞曇鈍奈那内乍凪薙謎灘捺鍋楢馴縄畷南楠軟難汝二尼弐迩匂賑肉虹廿日乳入如尿韮任妊忍認濡禰祢寧葱猫熱年念捻撚燃粘乃廼之埜嚢悩濃納能脳膿農覗蚤巴把播覇杷波派琶破婆罵芭馬俳廃拝排敗杯盃牌背肺輩配倍培媒梅楳煤狽買売賠陪這蝿秤矧萩伯剥博拍柏泊白箔粕舶薄迫曝漠爆縛莫駁麦函箱硲箸肇筈櫨幡肌畑畠八鉢溌発醗髪伐罰抜筏閥鳩噺塙蛤隼伴判半反叛帆搬斑板氾汎版犯班畔繁般藩販範釆煩頒飯挽晩番盤磐蕃蛮匪卑否妃庇彼悲扉批披斐比泌疲皮碑秘緋罷肥被誹費避非飛樋簸備尾微枇毘琵眉美鼻柊稗匹疋髭彦膝菱肘弼必畢筆逼桧姫媛紐百謬俵彪標氷漂瓢票表評豹廟描病秒苗錨鋲蒜蛭鰭品彬斌貧賓頻敏瓶不付夫婦富冨布府怖扶敷斧普浮父符腐膚芙譜負賦赴阜附侮撫武舞葡蕪部封楓風葺蕗伏副復幅服福腹複覆淵弗払沸仏物鮒分吻噴墳憤扮焚奮粉糞紛雰文聞丙併兵塀幣平弊柄並蔽閉陛米頁僻壁癖碧別瞥蔑箆偏変片篇編辺返遍便勉娩弁鞭保舗鋪圃捕歩甫補輔穂募墓慕戊暮母簿菩倣俸包呆報奉宝峰峯崩庖抱捧放方朋法泡烹砲縫胞芳萌蓬蜂褒訪豊邦鋒飽鳳鵬乏亡傍剖坊妨帽忘忙房暴望某棒冒紡肪膨謀貌貿鉾防吠頬北僕卜墨撲朴牧睦穆釦勃没殆堀幌奔本翻凡盆摩磨魔麻埋妹昧枚毎哩槙幕膜枕鮪柾鱒桝亦俣又抹末沫迄侭繭麿万慢満漫味未魅巳箕岬密蜜湊蓑稔脈妙粍民眠務夢無牟矛霧鵡椋婿娘冥名命明盟迷銘鳴姪牝滅免棉綿緬面麺摸模茂妄孟毛猛盲網耗蒙儲木黙目杢勿餅尤戻籾貰問悶紋門匁也冶夜爺耶野弥矢厄役約薬訳躍靖柳薮鑓愉愈油癒諭輸唯佑優勇友宥幽悠憂揖有柚湧涌猶猷由祐裕誘遊邑郵雄融夕予余与誉輿預傭幼妖容庸揚揺擁曜楊様洋溶熔用窯羊耀葉蓉要謡踊遥陽養抑欲沃浴翌翼羅螺裸来莱頼雷洛絡落酪乱卵嵐欄濫藍蘭覧利吏履李梨理璃痢裏裡里離陸律率立葎掠略劉流溜琉留硫粒隆竜龍侶慮旅虜了亮僚両凌寮料梁涼猟療瞭稜糧良諒遼量陵領力緑倫厘林淋燐琳臨輪隣鱗麟瑠塁涙累類令伶例冷励嶺怜玲礼苓鈴隷零霊麗齢暦歴列劣烈裂廉恋憐漣煉簾練聯蓮連錬呂魯櫓炉賂路露労婁廊弄朗楼榔浪漏牢狼篭老聾蝋郎六麓禄肋録論倭和話歪賄脇惑枠鷲亙亘鰐詫藁蕨椀湾碗腕",
+        16: "橘橋横樹機龍竜薫賢興鋼錯餐儒獣縦親静整積選操曇濃薄繁避壁磨麺融頼隣歴録",
+        17: "遠沢滝千葉優講謝謙購懇擦繊霜聴鍋繁避優翼療齢",
+        18: "織新田野村浜藤観顔騎鏡簡職礎騒贈題鎮闘難藩翻繭離類糧",
+        19: "関瀬鏡願繰警鯨識瀬贈懲爆譜簿霧離麗羅",
+        20: "滝瀬厳懸競護釈譲醸籍騰党竇飄魔露",
+        21: "桜鶴露顧護魔躍蘭欄覧",
+        22: "長谷川鑑歓驚襲鑑権響摂読囊嚢彎",
+        23: "清水顕験恋変",
+        24: "鷹鱗譲醸鷹",
+        25: "観鬱籬",
+        29: "鬱"
+    };
+
+    const strokeMap = Object.create(null);
+    for (const [strokesStr, chars] of Object.entries(RAW_STROKE_GROUPS)) {
+        const count = Number(strokesStr);
+        for (const char of Array.from(chars)) {
+            strokeMap[char] = count;
+        }
+    }
+    Object.freeze(strokeMap);
+
+    const VALID_NAME_REGEX = /^[\u3041-\u3096\u309D\u309E\u30A1-\u30FA\u30FC-\u30FE\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\u3005]+$/;
+
+    function calculateNameStrokes(nameStr) {
+        const chars = Array.from(nameStr);
+        let total = 0;
+        let prevStroke = 0;
+        const unknownChars = [];
+
+        for (let i = 0; i < chars.length; i++) {
+            const ch = chars[i];
+            if (ch === '々' || ch === 'ゝ' || ch === 'ゞ' || ch === 'ヽ' || ch === 'ヾ') {
+                if (prevStroke === 0) {
+                    return { error: `先頭に踊り字「${ch}」は使用できません。` };
+                }
+                total += prevStroke;
+            } else {
+                const s = strokeMap[ch];
+                if (typeof s !== 'number') {
+                    unknownChars.push(ch);
+                } else {
+                    total += s;
+                    prevStroke = s;
+                }
+            }
+        }
+
+        if (unknownChars.length > 0) {
+            return { error: `未登録の漢字が含まれています（${unknownChars.join('、')}）。辞書への追加が必要です。` };
+        }
+        return { total };
     }
 
-    const strokeTable = {
-        '青':8, '赤':7, '秋':9, '浅':12, '安':6, '阿':13, '井':4, '一':1, '市':5, '伊藤':29, '稲':14, '岩':8, '宇':6, '内':4, '梅':11, '浦':11, '遠':17, '大':3, '小':3, '岡田':13, '岡':8, '尾':7, '織':18,
-        '加':5, '神':10, '金':8, '川':3, '河':9, '木':4, '菊':14, '北':5, '久':3, '工':3, '久保':10, '倉':10, '黒':11, '小林':12, '近':12, '後':9, '小島':13,
-        '斎':11, '坂':7, '佐':7, '桜':21, '笹':11, '佐藤':29, '沢':17, '鹿':11, '柴':9, '嶋':14, '島':10, '清水':23, '白':5, '新':13, '菅':14, '杉':7, '鈴木':17, '瀬':20, '関':19, '園':13,
-        '高':10, '滝':20, '田':5, '武':8, '竹':6, '橘':16, '谷':7, '千葉':17, '塚':13, '辻':9, '土':3, '堤':12, '坪':8, '鶴':21, '寺':6, '手':4, '徳':15, '戸':4, '土井':7,
-        '永':5, '長':8, '中':4, '中村':11, '名':6, '西':6, '新田':18, '沼':9, '根':14, '野':11, '野村':18,
-        '橋':16, '長谷川':22, '服':8, '馬':10, '浜':18, '林':8, '原':10, '樋':15, '平':5, '広':15, '福':14, '藤':18, '古':5, '星':9, '堀':12, '本':5,
-        '前':9, '牧':8, '増':15, '松':8, '松本':13, '丸':3, '三':3, '水':4, '宮':10, '三浦':14, '村':7, '望':11, '森':12, '守':6,
-        '矢':5, '安田':11, '谷口':10, '柳':9, '山':3, '山口':6, '山田':8, '山崎':15, '山本':8, '横':16, '吉':6, '吉田':11, '米':6, '若':11, '渡':13, '義':13, '人':2
-    };
-    
-    function strictValidate(str) { return /^[\u4E00-\u9FFF]+$/.test(str); }
+    function computeVolatileSeed(text) {
+        let hash = 5381;
+        for (let i = 0; i < text.length; i++) {
+            hash = ((hash << 5) + hash) + text.charCodeAt(i);
+        }
+        return (hash >>> 0);
+    }
 
-    // 暗号ハッシュ値をベースに、毎回異なるメッセージのパーツを組み合わせる高度な仕組み
-    function generateDynamicComment(hashHex, totalStrokes, birthNum) {
-        // ハッシュ文字列から特定の数値を取り出して分岐の種にする
-        const seed1 = parseInt(hashHex.substring(0, 2), 16) % 4;
-        const seed2 = parseInt(hashHex.substring(2, 4), 16) % 4;
-        const seed3 = parseInt(hashHex.substring(4, 6), 16) % 4;
+    function generateFortuneMessage(seed, totalStrokes, birthNum) {
+        const s1 = seed % 4;
+        const s2 = (seed >>> 2) % 4;
+        const s3 = (seed >>> 4) % 4;
 
         const part1 = [
             `固有特性値は${totalStrokes}画をベースとし、`,
@@ -88,57 +151,60 @@
         ];
 
         const part2 = [
-            `入力された漢字の構成から「完璧な調和」とスマートな処理能力を示しています。`,
+            `入力された名前の構成から「完璧な調和」とスマートな処理能力を示しています。`,
             `名前の文字列が持つ独自の周波数が、リスクを事前に察知する強力な直感力を生み出しています。`,
-            `漢字の組み合わせそのものが独立心と強い自己防衛力を引き出す特殊な配列です。`,
+            `文字の組み合わせそのものが独立心と強い自己防衛力を引き出す特殊な配列です。`,
             `内に秘めた爆発的なポテンシャルと、堅実な資産防衛のバランスが非常に上手く取れています。`
         ];
 
         const part3 = [
-            `数秘術から導かれた誕生数【${birthNum}】の加護により、困難な局面でも常に最適なルートを選び取る「AI FIRE」の適性が極めて高く現れています。`,
-            `誕生数【${birthNum}】との複合解析の結果、地道な努力が大きな暗号資産の拡大へと繋がる、確実性の高い防衛戦術がベストです。`,
+            `数秘術から導かれた誕生数【${birthNum}】の加護により、困難な局面でも常に最適なルートを選び取る適性が極めて高く現れています。`,
+            `誕生数【${birthNum}】との複合解析の結果、地道な努力が大きな成果の拡大へと繋がる、確実性の高い防衛戦術がベストです。`,
             `天命数【${birthNum}】が示す未来予測では、自分の直感を信じて行動することで、周囲を圧倒する成功と自立を掴み取る運命にあります。`,
             `運命数【${birthNum}】の防衛シールドがアクティブになっており、予期せぬトラブルをすべてチャンスへと変換する強運を持っています。`
         ];
 
-        // 完全にランダムではなく「同じ名前なら必ず同じ」「漢字が違えば必ず違う」コメントになる
-        return "【解析結果】" + part1[seed1] + part2[seed2] + part3[seed3];
+        return "【解析結果】" + part1[s1] + part2[s2] + part3[s3];
     }
 
-    function executeSecureFortune() {
-        const rawLast = document.getElementById('nodeLastName').value.trim();
-        const rawFirst = document.getElementById('nodeFirstName').value.trim();
-        const rawBirth = document.getElementById('nodeBirthday').value;
-
-        if (!rawLast || !rawFirst || !rawBirth) { alert("入力を完了してください。"); return; }
-        if (!strictValidate(rawLast) || !strictValidate(rawFirst)) { alert("漢字のみで入力してください。"); return; }
-
-        const dbHash = secureLocalHash(`${rawLast}${rawFirst}${rawBirth}`);
-        document.getElementById('hexLogger').textContent = `DB累積ハッシュ: 0x${dbHash}`;
-
-        let lStrokes = 0; let fStrokes = 0;
-        for (let char of rawLast) { lStrokes += strokeTable[char] || 5; }
-        for (let char of rawFirst) { fStrokes += strokeTable[char] || 5; }
-        const grandTotal = lStrokes + fStrokes;
-
-        const birthDigits = rawBirth.replace(/[^0-9]/g, '');
-        let sum = 0;
-        for (let d of birthDigits) { sum += parseInt(d); }
-        while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
-            sum = String(sum).split('').reduce((acc, cur) => acc + parseInt(cur), 0);
-        }
-
-        // 暗号ハッシュを使って動的にコメントを生成する関数を呼び出す
-        const resultMsg = generateDynamicComment(dbHash, grandTotal, sum);
-
-        document.getElementById('outTitle').textContent = "🛡️ エンドツーエンド暗号化・鑑定完了";
-        document.getElementById('outMeta').textContent = "総格: " + grandTotal + "画 / 誕生数: 【" + sum + "】";
-        document.getElementById('outDesc').textContent = resultMsg;
-        document.getElementById('secureOutput').style.display = 'block';
-    }
-
-    document.getElementById('execBtn').addEventListener('click', executeSecureFortune);
+    function showError(msg) {const errBox = document.getElementById('errorBox');
+errBox.textContent = msg;
+errBox.style.display = 'block';
+document.getElementById('secureOutput').style.display = 'none';
+}
+function executeSecureFortune() {
+const errBox = document.getElementById('errorBox');
+errBox.style.display = 'none';
+const rawLast = document.getElementById('nodeLastName').value.trim();
+const rawFirst = document.getElementById('nodeFirstName').value.trim();
+const rawBirth = document.getElementById('nodeBirthday').value;
+if (!rawLast || !rawFirst || !rawBirth) {
+showError("苗字・名前・生年月日をすべて入力してください。");
+return;
+}
+if (!VALID_NAME_REGEX.test(rawLast) || !VALID_NAME_REGEX.test(rawFirst)) {
+showError("使用できない文字が含まれています。漢字・ひらがな・カタカナで入力してください。");
+return;
+}
+const lastResult = calculateNameStrokes(rawLast);
+if (lastResult.error) { showError("苗字エラー: " + lastResult.error); return; }
+const firstResult = calculateNameStrokes(rawFirst);
+if (firstResult.error) { showError("名前エラー: " + firstResult.error); return; }
+const grandTotal = lastResult.total + firstResult.total;
+const birthDigits = rawBirth.replace(/[^0-9]/g, '');
+let sum = 0;
+for (const d of birthDigits) { sum += Number(d); }
+while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
+sum = String(sum).split('').reduce((acc, cur) => acc + Number(cur), 0);
+}
+const volatileSeed = computeVolatileSeed(${rawLast}:${rawFirst}:${rawBirth});
+const resultMsg = generateFortuneMessage(volatileSeed, grandTotal, sum);
+executionCount += 1;
+document.getElementById('execCounter').textContent = String(executionCount);
+document.getElementById('outTitle').textContent = "🛡️ 鑑定完了（ゼロ・データ保持モード）";
+document.getElementById('outMeta').textContent = 総格: ${grandTotal}画（苗字 ${lastResult.total}画 ＋ 名前 ${firstResult.total}画） / 誕生数: 【${sum}】;
+document.getElementById('outDesc').textContent = resultMsg;
+document.getElementById('secureOutput').style.display = 'block';
+}
+document.getElementById('execBtn').addEventListener('click', executeSecureFortune);
 })();
-</script>
-</body>
-</html>
