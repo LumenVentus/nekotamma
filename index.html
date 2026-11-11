@@ -89,3 +89,141 @@
         25: ["観鬱籬観"],
         29: ["鬱"]
     };
+    const strokeMap = Object.create(null);
+    for (const [strokesStr, chunks] of Object.entries(RAW_STROKE_GROUPS)) {
+        const count = Number(strokesStr);
+        for (const chunk of chunks) {
+            for (const char of Array.from(chunk)) {
+                if (strokeMap[char] === undefined) {
+                    strokeMap[char] = count;
+                }
+            }
+        }
+    }
+    Object.freeze(strokeMap);
+
+    const VALID_NAME_REGEX = /^[\u3041-\u3096\u309D\u309E\u30A1-\u30FA\u30FC-\u30FE\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\u3005]+$/;
+
+    function calculateNameStrokes(nameStr) {
+        const chars = Array.from(nameStr);
+        let total = 0;
+        let prevStroke = 0;
+        const unknownChars = [];
+
+        for (let i = 0; i < chars.length; i++) {
+            const ch = chars[i];
+            if (ch === '々' || ch === 'ゝ' || ch === 'ゞ' || ch === 'ヽ' || ch === 'ヾ') {
+                if (prevStroke === 0) {
+                    return { error: `先頭に踊り字「${ch}」は使用できません。` };
+                }
+                total += prevStroke;
+            } else {
+                const s = strokeMap[ch];
+                if (typeof s !== 'number') {
+                    unknownChars.push(ch);
+                } else {
+                    total += s;
+                    prevStroke = s;
+                }
+            }
+        }
+
+        if (unknownChars.length > 0) {
+            return { error: `未登録の漢字が含まれています（${unknownChars.join('、')}）。` };
+        }
+        return { total };
+    }
+
+    function computeVolatileSeed(text) {
+        let hash = 5381;
+        for (let i = 0; i < text.length; i++) {
+            hash = ((hash << 5) + hash) + text.charCodeAt(i);
+        }
+        return (hash >>> 0);
+    }
+
+    function generateFortuneMessage(seed, totalStrokes, birthNum) {
+        const s1 = seed % 4;
+        const s2 = (seed >>> 2) % 4;
+        const s3 = (seed >>> 4) % 4;
+
+        const part1 = [
+            `固有特性値は${totalStrokes}画をベースとし、`,
+            `算出された総格${totalStrokes}画の波動エネルギーは、`,
+            `固有識別コード${totalStrokes}画に秘められた性質は、`,
+            `基盤データ${totalStrokes}画から解析された資質は、`
+        ];
+
+        const part2 = [
+            `入力された名前の構成から「完璧な調和」とスマートな処理能力を示しています。`,
+            `名前の文字列が持つ独自の周波数が、リスクを事前に察知する強力な直感力を生み出しています。`,
+            `文字の組み合わせそのものが独立心と強い自己防衛力を引き出す特殊な配列です。`,
+            `内に秘めた爆発的なポテンシャルと、堅実な資産防衛のバランスが非常に上手く取れています。`
+        ];
+
+        const part3 = [
+            `数秘術から導かれた誕生数【${birthNum}】の加護により、困難な局面でも常に最適なルートを選び取る適性が極めて高く現れています。`,
+            `誕生数【${birthNum}】との複合解析の結果、地道な努力が大きな成果の拡大へと繋がる、確実性の高い防衛戦術がベストです。`,
+            `天命数【${birthNum}】が示す未来予測では、自分の直感を信じて行動することで、周囲を圧倒する成功と自立を掴み取る運命にあります。`,
+            `運命数【${birthNum}】の防衛シールドがアクティブになっており、予期せぬトラブルをすべてチャンスへと変換する強運を持っています。`
+        ];
+
+        return "【解析結果】" + part1[s1] + part2[s2] + part3[s3];
+    }
+
+    function showError(msg) {
+        const errBox = document.getElementById('errorBox');
+        errBox.textContent = msg;
+        errBox.style.display = 'block';
+        document.getElementById('secureOutput').style.display = 'none';
+    }
+
+    function executeSecureFortune() {
+        const errBox = document.getElementById('errorBox');
+        errBox.style.display = 'none';
+
+        const rawLast = document.getElementById('nodeLastName').value.trim();
+        const rawFirst = document.getElementById('nodeFirstName').value.trim();
+        const rawBirth = document.getElementById('nodeBirthday').value;
+
+        if (!rawLast || !rawFirst || !rawBirth) {
+            showError("苗字・名前・生年月日をすべて入力してください。");
+            return;
+        }
+        if (!VALID_NAME_REGEX.test(rawLast) || !VALID_NAME_REGEX.test(rawFirst)) {
+            showError("使用できない文字が含まれています。漢字・ひらがな・カタカナで入力してください。");
+            return;
+        }
+
+        const lastResult = calculateNameStrokes(rawLast);
+        if (lastResult.error) { showError("苗字エラー: " + lastResult.error); return; }
+
+        const firstResult = calculateNameStrokes(rawFirst);
+        if (firstResult.error) { showError("名前エラー: " + firstResult.error); return; }
+
+        const grandTotal = lastResult.total + firstResult.total;
+
+        const birthDigits = rawBirth.replace(/[^0-9]/g, '');
+        let sum = 0;
+        for (const d of birthDigits) { sum += Number(d); }
+        while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
+            sum = String(sum).split('').reduce((acc, cur) => acc + Number(cur), 0);
+        }
+
+        const volatileSeed = computeVolatileSeed(`${rawLast}:${rawFirst}:${rawBirth}`);
+        const resultMsg = generateFortuneMessage(volatileSeed, grandTotal, sum);
+
+        executionCount += 1;
+        document.getElementById('execCounter').textContent = String(executionCount);
+
+        document.getElementById('outTitle').textContent = "🛡️ 鑑定完了（ゼロ・データ保持モード）";
+        document.getElementById('outMeta').textContent = `総格: ${grandTotal}画（苗字 ${lastResult.total}画 ＋ 名前 ${firstResult.total}画） / 誕生数: 【${sum}】`;
+        document.getElementById('outDesc').textContent = resultMsg;
+        document.getElementById('secureOutput').style.display = 'block';
+    }
+
+    document.getElementById('execBtn').addEventListener('click', executeSecureFortune);
+})();
+</script>
+</body>
+</html>
