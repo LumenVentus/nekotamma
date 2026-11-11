@@ -219,3 +219,216 @@
         80: { luck: "凶",   badge: "badge-kyou",     desc: "一区切りと新たな始まりを表す数理。執着を手放し、新しい視点で再スタートを切ることで運気が開けます。" },
         81: { luck: "大吉", badge: "badge-daikichi", desc: "究極の完成と再生を表す大吉数。すべての経験が統合され、新たな高みへと飛躍する最高峰の吉運です。" }
     });
+    function get81Info(num) {
+        let n = num;
+        while (n > 81) { n -= 80; }
+        if (n < 1) n = 1;
+        return FORTUNE_81[n];
+    }
+
+    // 5. 単一文字の画数取得エンジン（NFD自動分解の0文字目参照を厳密化）
+    function getCharStroke(ch) {
+        if (Object.prototype.hasOwnProperty.call(KANA_BASE, ch)) {
+            return KANA_BASE[ch];
+        }
+        const nfd = ch.normalize('NFD');
+        if (nfd.length > 1 && Object.prototype.hasOwnProperty.call(KANA_BASE, nfd[0])) {
+            let total = KANA_BASE[nfd[0]];
+            for (let i = 1; i < nfd.length; i++) {
+                if (nfd[i] === '\u3099') total += 2;      // 濁点（゛）は +2画
+                else if (nfd[i] === '\u309A') total += 1; // 半濁点（゜）は +1画
+            }
+            return total;
+        }
+        if (KANJI_MAP[ch] !== undefined) {
+            return KANJI_MAP[ch];
+        }
+        return null;
+    }
+
+    function analyzeNameArray(nameStr) {
+        const chars = Array.from(nameStr);
+        const strokes = [];
+        const unknown = [];
+        for (const ch of chars) {
+            const s = getCharStroke(ch);
+            if (s === null) {
+                unknown.push(ch);
+            } else {
+                strokes.push(s);
+            }
+        }
+        if (unknown.length > 0) {
+            return { error: `未登録の文字が含まれています（${unknown.join('、')}）。` };
+        }
+        return { chars, strokes };
+    }
+
+    // 6. 入力バリデーション（漢字・ひらがな・カタカナ・々・ー・中黒を許可）
+    const VALID_NAME_REGEX = /^[\u3041-\u3096\u309D\u309E\u30A1-\u30FA\u30FC-\u30FE\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\u3005\u30FB]+$/;
+
+    function showError(msg) {
+        const errBox = document.getElementById('errorBox');
+        errBox.textContent = msg;
+        errBox.style.display = 'block';
+        document.getElementById('secureOutput').style.display = 'none';
+    }
+
+    function createResultCard(titleText, strokeNum, badgeText, badgeClass, descText) {
+        const card = document.createElement('div');
+        card.className = 'gokaku-card';
+
+        const header = document.createElement('div');
+        header.className = 'gokaku-header';
+
+        const titleSpan = document.createElement('span');
+        titleSpan.textContent = `${titleText}：${strokeNum}画`;
+
+        const badgeSpan = document.createElement('span');
+        badgeSpan.className = badgeClass;
+        badgeSpan.textContent = badgeText;
+
+        header.appendChild(titleSpan);
+        header.appendChild(badgeSpan);
+
+        const descP = document.createElement('p');
+        descP.className = 'gokaku-desc';
+        descP.textContent = descText;
+
+        card.appendChild(header);
+        card.appendChild(descP);
+        return card;
+    }
+
+    function executeSecureFortune() {
+        const errBox = document.getElementById('errorBox');
+        errBox.style.display = 'none';
+
+        const rawLast = document.getElementById('nodeLastName').value.trim();
+        const rawFirst = document.getElementById('nodeFirstName').value.trim();
+        const rawBirth = document.getElementById('nodeBirthday').value;
+
+        if (!rawLast || !rawFirst || !rawBirth) {
+            showError("苗字・名前・生年月日をすべて入力してください。");
+            return;
+        }
+        if (!VALID_NAME_REGEX.test(rawLast) || !VALID_NAME_REGEX.test(rawFirst)) {
+            showError("使用できない文字が含まれています。漢字・ひらがな・カタカナで入力してください。");
+            return;
+        }
+
+        const lastData = analyzeNameArray(rawLast);
+        if (lastData.error) { showError("苗字エラー: " + lastData.error); return; }
+
+        const firstData = analyzeNameArray(rawFirst);
+        if (firstData.error) { showError("名前エラー: " + firstData.error); return; }
+
+        const lArr = lastData.strokes;
+        const fArr = firstData.strokes;
+
+        const lSum = lArr.reduce((a, b) => a + b, 0);
+        const fSum = fArr.reduce((a, b) => a + b, 0);
+
+        // 五格の算出（一字姓・一字名の霊数+1補正を含む古典数理）
+        const soukaku = lSum + fSum; // 総格（総画）
+        const tenkaku = (lArr.length === 1) ? (lSum + 1) : lSum; // 天格
+        const jinkaku = lArr[lArr.length - 1] + fArr[0]; // 人格（苗字の最後の字＋名前の最初の字）
+        const chikaku = (fArr.length === 1) ? (fSum + 1) : fSum; // 地格
+
+        // 外格（霊数補正を含めた全体から人格を引く）
+        const virtualTotal = tenkaku + chikaku;
+        let gaikaku = virtualTotal - jinkaku;
+        if (gaikaku < 1) gaikaku = 1;
+
+        // 誕生数（数秘術）の算出
+        const birthDigits = rawBirth.replace(/[^0-9]/g, '');
+        let birthNum = 0;
+        for (const d of birthDigits) { birthNum += Number(d); }
+        while (birthNum > 9 && birthNum !== 11 && birthNum !== 22 && birthNum !== 33) {
+            birthNum = String(birthNum).split('').reduce((acc, cur) => acc + Number(cur), 0);
+        }
+
+        const birthMessages = {
+            1: "【リーダー・開拓者】強い独立心と行動力を持ち、自らの直感で新しい道を切り拓く資質を備えています。",
+            2: "【協調・サポーター】優れた共感力とバランス感覚を持ち、人と人との調和を生み出して信頼を築きます。",
+            3: "【表現・クリエイター】豊かな発想力と明るさを持ち、周囲に喜びと活力を与える創造的なエネルギーに満ちています。",
+            4: "【堅実・築城家】誠実な計画性と強い責任感を持ち、揺るぎない基盤と資産を着実に築き上げる防衛の達人です。",
+            5: "【自由・冒険家】抜群の適応力と好奇心を持ち、変化を恐れず新しい環境でチャンスを掴み取る自由人です。",
+            6: "【愛情・調和の守護者】深い思いやりと責任感を持ち、家族や仲間を守り育てる温かいリーダーシップを発揮します。",
+            7: "【探求・分析家】鋭い洞察力と知性を持ち、物事の本質を見抜いて独自の専門分野を極める賢者の資質です。",
+            8: "【達成・実業家】強い意志と実行力を持ち、困難を乗り越えて大きな成果と物質的な豊かさを実現します。",
+            9: "【博愛・完成者】広い視野と包容力を持ち、多くの経験や知識を統合して周囲に良い影響を与える賢明な魂です。",
+            11: "【マスターナンバー11・直感の導き手】研ぎ澄まされた直感力とインスピレーションを持ち、独自の視点で未来を切り拓きます。",
+            22: "【マスターナンバー22・理想の実現者】壮大なビジョンを現実の形にする圧倒的な構築力と実行力を秘めています。",
+            33: "【マスターナンバー33・無償の奉仕者】枠にとらわれない大きな愛情とカリスマ性で、周囲の常識を超えて人々に希望を与えます。"
+        };
+
+        // 累計カウンターの更新（個人情報は一切保存せず破棄）
+        executionCount += 1;
+        document.getElementById('execCounter').textContent = String(executionCount);
+
+        // 結果パネルの描画
+        const outPanel = document.getElementById('secureOutput');
+        outPanel.textContent = '';
+
+        const infoSou = get81Info(soukaku);
+        const infoJin = get81Info(jinkaku);
+        const infoChi = get81Info(chikaku);
+        const infoGai = get81Info(gaikaku);
+
+        outPanel.appendChild(createResultCard(
+            "🌟 総格（人生全体の運勢・晩年運）",
+            soukaku,
+            infoSou.luck,
+            infoSou.badge,
+            infoSou.desc
+        ));
+
+        outPanel.appendChild(createResultCard(
+            "🏛️ 天格（家系運・先祖からの宿命）",
+            tenkaku,
+            "家系運",
+            "badge-kichi",
+            "苗字が持つ宿命的なエネルギーです。個人の吉凶よりも、ご自身の代でどのような才能を社会に活かすかの土台を示します。"
+        ));
+
+        outPanel.appendChild(createResultCard(
+            "💼 人格（性格・才能・仕事運・中年運）",
+            jinkaku,
+            infoJin.luck,
+            infoJin.badge,
+            infoJin.desc
+        ));
+
+        outPanel.appendChild(createResultCard(
+            "🌱 地格（幼少期〜青年期・家庭運・基礎運）",
+            chikaku,
+            infoChi.luck,
+            infoChi.badge,
+            infoChi.desc
+        ));
+
+        outPanel.appendChild(createResultCard(
+            "🤝 外格（対人関係・周囲からの評価・環境運）",
+            gaikaku,
+            infoGai.luck,
+            infoGai.badge,
+            infoGai.desc
+        ));
+
+        outPanel.appendChild(createResultCard(
+            "🔢 誕生数（数秘術による生まれ持った本質）",
+            birthNum,
+            `誕生数【${birthNum}】`,
+            "badge-daikichi",
+            birthMessages[birthNum] || "独自の輝きと可能性を秘めた特別な数秘エネルギーを持っています。"
+        ));
+
+        outPanel.style.display = 'block';
+    }
+
+    document.getElementById('execBtn').addEventListener('click', executeSecureFortune);
+})();
+</script>
+</body>
+</html>
