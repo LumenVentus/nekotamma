@@ -8,23 +8,30 @@
     <title>ZERO-TRUST FORTUNE SYSTEM v2026.11</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #020617; color: #f8fafc; padding: 20px; display: flex; justify-content: center; margin: 0; }
-        .secure-fortress { max-width: 500px; width: 100%; background: #0f172a; padding: 30px; border-radius: 12px; border: 2px solid #0ea5e9; box-shadow: 0 0 24px rgba(14, 165, 233, 0.25); box-sizing: border-box; }
-        h1 { text-align: center; color: #0ea5e9; font-size: 20px; margin: 0 0 25px 0; letter-spacing: 0.05em; }
-        .input-block { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; color: #94a3b8; font-size: 14px; font-weight: bold; }
+        .secure-fortress { max-width: 540px; width: 100%; background: #0f172a; padding: 28px; border-radius: 12px; border: 2px solid #0ea5e9; box-shadow: 0 0 24px rgba(14, 165, 233, 0.25); box-sizing: border-box; }
+        h1 { text-align: center; color: #0ea5e9; font-size: 20px; margin: 0 0 22px 0; letter-spacing: 0.05em; }
+        .input-block { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 6px; color: #94a3b8; font-size: 13px; font-weight: bold; }
         input { width: 100%; padding: 12px; background: #020617; border: 1px solid #334155; border-radius: 6px; color: #ffffff; font-size: 16px; box-sizing: border-box; }
         input:focus { outline: none; border-color: #0ea5e9; }
-        button { width: 100%; padding: 14px; background: #0ea5e9; color: #ffffff; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        button { width: 100%; padding: 14px; background: #0ea5e9; color: #ffffff; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 8px; }
         button:hover { background: #38bdf8; }
-        .counter-monitor { margin-top: 20px; padding: 12px; background: #020617; border-radius: 6px; border: 1px solid #1e293b; font-family: monospace; font-size: 13px; text-align: center; color: #38bdf8; }
-        .output-panel { margin-top: 20px; padding: 18px; background: #1e293b; border-radius: 6px; display: none; border-left: 4px solid #0ea5e9; }
+        .counter-monitor { margin-top: 18px; padding: 10px; background: #020617; border-radius: 6px; border: 1px solid #1e293b; font-family: monospace; font-size: 13px; text-align: center; color: #38bdf8; }
         .error-panel { margin-top: 15px; padding: 12px; background: #450a0a; border: 1px solid #ef4444; border-radius: 6px; color: #fca5a5; font-size: 13px; display: none; }
+        .output-panel { margin-top: 20px; display: none; }
+        .gokaku-card { background: #1e293b; border-left: 4px solid #0ea5e9; border-radius: 6px; padding: 14px; margin-bottom: 12px; }
+        .gokaku-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-weight: bold; color: #e2e8f0; font-size: 15px; }
+        .badge-daikichi { background: #0284c7; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+        .badge-kichi { background: #059669; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+        .badge-hankichi { background: #d97706; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+        .badge-kyou { background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+        .gokaku-desc { color: #cbd5e1; font-size: 13px; line-height: 1.6; margin: 0; }
     </style>
 </head>
 <body>
 
 <div class="secure-fortress">
-    <h1>🔮 姓名判断 × 誕生日占い</h1>
+    <h1>🔮 ゼロトラスト本格姓名判断 × 誕生数</h1>
     
     <div class="input-block">
         <label for="nodeLastName">苗字（漢字・ひらがな・カタカナ）</label>
@@ -39,7 +46,7 @@
         <input type="date" id="nodeBirthday" min="1900-01-01" max="2099-12-31">
     </div>
     
-    <button id="execBtn" type="button">占ってみる</button>
+    <button id="execBtn" type="button">五格＆誕生数を鑑定する</button>
 
     <div id="errorBox" class="error-panel" role="alert"></div>
 
@@ -47,11 +54,7 @@
         📊 占い実行累計数: <strong id="execCounter">0</strong> 回
     </div>
 
-    <div id="secureOutput" class="output-panel">
-        <h3 id="outTitle" style="margin:0 0 10px 0; color:#0ea5e9; font-size:16px;"></h3>
-        <p id="outMeta" style="font-weight: bold; color: #e2e8f0; margin: 0 0 10px 0;"></p>
-        <p id="outDesc" style="color: #cbd5e1; line-height: 1.7; margin: 0; font-size: 14px;"></p>
-    </div>
+    <div id="secureOutput" class="output-panel"></div>
 </div>
 
 <script>
@@ -60,199 +63,31 @@
 
     let executionCount = 0;
 
-       const RAW_STROKE_GROUPS = {
-        1: ["一乙丶ノ亅ー丨"],
-        2: ["二丁七九了二人入八力十卜又乃刀匕厂匚刂"],
-        3: ["くしつへりレコソノヘリレン三丈上下丸久才千口土士夕大女子寸小山川工己干弓巾广万与亡凡刃勺"],
-        4: ["いこてにひふみよをんイカキクケスセタチトニヌネハヒフマミムメモノユヨラリルレロワン五六円天日月中水火木王太文方心手毛気片牛犬牙瓦甘生用田白皮皿目矛矢石示禾穴立内今公分切友匹午反双太夫少引心戸支斗斤比氏爪父片牙牛犬王元井勿尤介仇允凶刈切匂勿升厄及双収"],
-        5: ["あえおきすせそちぬねのはほまむめもらるれろがぎぐざじずぜぞだぢづでどばびぶべぼアウエオサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ永本正四瓜且世丘主乍乏乎仕付仙代令以兄冊写冬処出功加包北半占去古句可台史右号司央失奴尻左巧巨市布平幼庁広必打払斥旦旧未末札母民氷犯玄玉甘生用田由甲申白皮皿目矛矢石示禾穴立辺込叶司外召叱只叩台右号兄充兆先光克免児入全八公六共兵具典兼内円冊再冒冗冠冬冷准凍凝凡処凶出刀分切刊刑列初判別利到制刷券刺刻則削前剖剛剣剤副剰割創劇力功加助努励労効勅勇勉動勘務勝募勢勤勧勲弘"],
-        6: ["うかなやゆわぁぃぅぇぉっゃゅょゎゥカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンァィゥェォッャュョヮ朱安伊宇江岡加吉久共曲光交合好行西早州舟色全先多竹地池虫兆年百名有羽自至舌舛艮虍血衣丞両並乖乱乳事亜享京亮人仁今介仏仕他付仙代令以仮仰仲件任企伏伐休会伝伯伴伸伺似但位低住佐体何余作佳併使例侍供依価侮侯侵便係促俊俗保信修俳俵俸俺倉個倍倒候借倣値倫倹偉偏停健側偶傍傑備催傭傲伝債傷傾働像僕僚偽僧価儀億儒償優元兄充兆先光克免児党入全八公六共兵具典兼内円冊再冒冗冠冬冷准凍凝凡処凶出刀分切刊刑列初判別利到制刷券刺刻則削前剖剛剣剤副剰割創劇力功加助努励労効勅勇勉動勘務勝募勢勤勧勲匠匡印危却卵巻卸即厘原去参又友反収叔取受口古句叩只叫召叭可台叱史右叶号司各合吉吊同名后吏吐向君吟否含吸吹呈呉告周味呼命和"],
-        7: ["がぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ赤佐坂杉谷村男町足体弟図声売麦来里良見角言豆豕豸貝走身車辛辰酉釆杜作住低位余利助努労医君吹呈呉告吸周味呼命和固国坂均坊坑坪垂型埋城域執培基堂堅堆堕堤堪報場堺塊塑塗塚塩填塾境墓増墜墨墳墾壁壇壊壌士壮声壱売変夏夕外多夜夢大天太夫央失奇奈奉奏契奔奥奨奪女好如妃妄妊妙妥妨妹妻姉始姓委姫姻姿威娘娯娠婆婚婦婿媒媛嫁嫌嫡嬢子孔字存孝季学孫宅宇守安完宗官宙定宜宝実客宣室宮宰害宴宵家容宿寂寄密富寒寛寝察寡寧審寮寸寺対寿封専射将尉尊尋導小少尚就尺尼尽尾尿局居屈届屋展属層山岐岩岸峠峰島峡崇崎崩川州巡工左巧巨差己巻市布希師席帯帰帳常帽幅幕干平年幸幹幻幼幽幾庁広床序底店府度座庫庭庶康庸廃廉廊延建弁弄弊式弓引弟弦弧弱張強弾当形彩彫影役彼往征待律後徒従得御復循微徳徴徹心必忌忍志忘忙応忠快念怒怖思怠急性怨怪恋恐恒恥恨恩恭息恵悔悟悠患悦悩悪悲悼情惑惜惨惰想愁愉意愚愛感慈態慌慎慕慢慣慨慮慰慶憂憎憤憩憲憶憾懇応懲懐懸恋吾呂呆呈呉告吹吻吼吸呈呉告"],
-        8: ["ぱぴぷぺぽパピプペポ青岩岡金長林松武服牧岸京協近具空国固昆使始姉実社者周宗招承昇昭松沼状性政斉昔析切折浅戦選然争相送息速存村他打対待代第題炭短談着注柱昼町長鳥朝直通追定底的典店点転徒努灯堂働特毒独届南難二肉日入乳尿任認熱念脳納能波派破敗倍博畑八発反坂板返販飯飛費美鼻必氷表秒病品負部服福物分文聞平兵別変辺便包放法望牧北木本毎妹枚幕末万満味未脈民務無迷鳴面綿毛目問門夜野役約薬由油有勇予余容洋葉陽様欲浴来落乱卵覧利里理陸立律略流留粒旅両料良力緑林輪類冷例歴列連練老労録論和話卓享京亮依価侍佳併使供例侮侯侵便係促俊俗保信修俳俵俸俺倉個倍倒候借倣値倫倹偉偏停健側偶傍傑備催傭傲伝債傷傾働像僕僚偽僧価儀億儒償優児党兵具典兼内円冊再冒冗冠冬冷准凍凝凡処凶出刀分切刊刑列初判別利到制刷券刺刻則削前剖剛剣剤副剰割創劇力功加助努励労効勅勇勉動勘務勝募勢勤勧勲協卒卓単卖南博占印危即却卵卸厄厘厚原去参双反収叔取受口古句叩只叫召叭可台叱史右叶号司各合吉吊同名后吏吐向君吟否含吸吹呈呉告周味呼命和咲咽哀品哄哉員哲哺唄唆唇唐唯唱唾商問啓善喉喊喘喜喝喧喪喫営嗅嗣嘆嘉嘱嘲器噴嚇厳囂"],
-        9: [
-            "美秋河後柴星前柳南春海音風草茶昼食首飛香馬骨高鬼魚鳥鹿麦麻黄黍黒栄映泳沿屋科架界客急級研県建限故厚皇紅荒香革思指持室重叙乗城浄信神親政星省宣送則相草族待炭柱注追訂度怒逃洞毒独南背拝畑発秒品負赴風服福物変便保歩冒某",
-            "哀威為畏胃姨郁胤咽姻院音垣冠看姦咸巻軌紀既祈客急級糾曲局矩契係型計建研県限故枯胡弧誇個庫湖股虎鼓互娯悟御交侯候光厚后向好孝宏工巧巷幸広康弘恒慌抗拘控攻昂晃更杭校梗構江洪浩港溝甲皇硬稿紅絞綱耕考肯航荒行衡講貢購郊酵鉱鋼降項香高剛号合拷豪克刻告国穀酷黒獄腰骨",
-            "哉柵咲砂砕宰栽彩采済祭斎細菜裁載際剤在材罪財坂阪堺榊肴崎作削昨策索錯桜笹刷察撮擦札殺薩雑皿三傘参山惨散桟産算蚕賛酸残仕使刺司史嗣四士始姉姿子市師志思指支施旨枝止死氏私糸紙紫肢脂至視詞詩試誌資賜雌飼歯事似侍児字寺慈持時次滋治磁示耳自辞式識軸七失室湿漆疾質実芝舎写射捨赦斜煮社者謝車遮蛇邪借釈若弱主取守手朱殊狩珠種趣酒首儒受呪寿授樹需囚収周宗就州修愁拾洲秀秋終習臭舟衆襲週集住充十従柔汁渋獣縦重銃叔宿淑祝縮塾熟出術述俊春瞬准循旬殉準潤盾純巡遵順処初所暑署書諸助叙女序徐除傷償勝匠升召商唱奨宵将小少尚庄床彰承抄招掌昇昌昭晶松沼消渉焼焦照症省硝祥称章笑粧紹肖賞鐘障上丈乗冗剰城場壌嬢常情条浄状畳蒸譲醸錠飾拭植殖織職色触食辱伸信侵唇寝審心慎振新森浸深申真神紳臣薪親診身辛進針震人仁刃尋甚尽迅陣"
-        ],
-        10: [
-            "神高倉島原宮馬谷栗桂桐桑桜梅桃梨柿柳株根格校案栽框栖桁桟梓梗梢梧梨梭梯械梱棄棋棒棚棟森棺椅植検業極楽概構様槽標模権横樹橋機員院飲運恩記起帰夏家荷華菓貨害悔海界絵開階街各覚角較隔閣学楽活渇割釜鎌刈乾勘患感歓汗漢甘監看管簡観館顔願",
-            "挨悪握圧扱宛嵐案暗以位依偉囲委威尉意慰易為異移維緯胃衣違遺医井域育一壱逸稲芋印員因姻引飲院陰隠韻右宇羽雨渦浦運雲永泳英映栄営詠影鋭衛易疫益液駅悦越謁閲円延沿炎宴援園演遠鉛塩汚凹央奥往応押横欧殴王翁黄沖億屋憶乙卸恩温穏音",
-            "化仮何価佳加可嘉夏嫁家寡科暇果架歌河火禍稼箇花荷華菓課貨過蚊我画芽賀雅餓介会解回塊壊快怪悔懐戒拐改械海灰界皆絵開階貝劾外害崖慨概該街垣嚇各拡格核殻獲確穫覚角隔閣学岳楽額顎掛潟括活喝渇滑褐轄株釜鎌刈干刊勘勧巻喚堪奸完官寛干幹患感慣憾換敢柑桓棺款歓汗漢甘監看管簡緩缶肝艦観貫還鑑間閑関陥韓館丸含岸眼岩頑顔願"
-        ],
-        11: [
-            "浅梅浦黒笹鹿野望若斎堀菊崎常清深理琉梨章笛第紺細終組経絵統続絹総緑線編練縁縄縦縮績繁繊織悪異移偉域育一壱逸稲芋印員因姻引飲院陰隠韻右宇羽雨渦浦運雲永泳英映栄営詠影鋭衛易疫益液駅悦越謁閲円延沿炎宴援園演遠鉛塩汚凹央奥往応押横欧殴王翁黄沖億屋憶乙卸恩温穏音",
-            "企伎危喜器基奇嬉寄岐希幾忌揮机旗既期棋棄機帰毅気汽祈季稀紀徽規記貴起軌輝飢騎鬼偽儀宜戯技擬欺犠疑祇義蟻誼議菊喫詰却客脚虐逆丘久休及吸宮弓急救朽求汲泣灸球究窮級糾給旧牛去居巨拒拠挙虚許距魚御漁凶共叫喬境峡強恐恭挟教橋況狂狭矯胸脅興郷鏡響驚仰凝暁業局曲極玉勤均巾錦斤欣欽緊菌襟謹近金吟銀",
-            "九句区苦駆具愚空偶遇隅屈掘靴繰桑勲君薫訓群軍郡兄刑形系径恵啓掲渓経継茎蛍計警軽鶏芸迎鯨劇撃激欠決潔穴結血月件健兼券剣圏堅嫌建憲懸拳検権牽犬献研絹県肩見謙賢軒遣鍵険顕験元原厳幻弦減源玄現言限個古呼固孤己庫弧戸故枯湖誇雇顧鼓五互午呉娯後御悟碁語誤護交候光公功効勾厚口向后喉坑好孔孝宏工巧巷幸広康弘恒慌抗拘控攻更校構江洪港溝甲皇硬稿紅絞綱耕考肯航荒行衡講貢購郊酵鉱鋼降項香高剛号合拷豪克刻告国穀酷黒獄腰骨込今困婚恨懇昏根混紺魂"
-        ],
-        12: [
-            "堤堀森渡晴智翔陽結絢絵貴景暁晶暑暖暗暮暴暦曇曜下化仮何価佳加可嘉夏嫁家寡科暇果架歌河火禍稼箇花荷華菓課貨過蚊我画芽賀雅餓介会解回塊壊快怪悔懐戒拐改械海灰界皆絵開階貝劾外害崖慨概該街垣嚇各拡格核殻獲確穫覚角隔閣学岳楽額顎掛潟括活喝渇滑褐轄",
-            "佐唆左差査沙砂詐鎖座債催再最妻宰彩才採栽歳済災砕斎細菜裁載際剤在材罪財坂阪堺咲崎作削昨策索錯桜冊刷察撮擦札殺雑皿三傘参山惨散桟産算蚕賛酸残仕使刺司史嗣四士始姉姿子市師志思指支施旨枝止死氏私糸紙紫肢脂至視詞詩試誌資賜雌飼歯事似侍児字寺慈持時次滋治磁示耳自辞式識軸七失室湿漆疾質実芝舎写射捨赦斜煮社者謝車遮蛇邪借釈若弱主取守手朱殊狩珠種趣酒首儒受呪寿授樹需囚収周宗就州修愁拾洲秀秋終習臭舟衆襲週集住充十従柔汁渋獣縦重銃叔宿淑祝縮塾熟出術述俊春瞬准循旬殉準潤盾純巡遵順処初所暑署書諸助叙女序徐除傷償勝匠升召商唱奨宵将小少尚庄床彰承抄招掌昇昌昭晶松沼消渉焼焦照症省硝祥称章笑粧紹肖賞鐘障上丈乗冗剰城場壌嬢常情条浄状畳蒸譲醸錠飾拭植殖織職色触食辱伸信侵唇寝審心慎振新森浸深申真神紳臣薪親診身辛進針震人仁刃尋甚尽迅陣",
-            "須酢図吹垂帥推水炊睡粋衰遂酔錘随瑞髄崇嵩数枢据杉澄寸世瀬畝是制勢姓征性成政整星晴正清牲生盛精聖声製西誠誓請逝青静斉税脆席惜斥昔析石積籍績脊責赤跡切拙接摂折設窃節説雪絶舌仙先千占宣専川戦扇撰栓泉浅洗染潜腺船選遷銭銑鮮前善漸然全禅繕膳"
-        ],
-        13: [
-            "阿園新塚渡義愛聖詩誠裕靖豊夢照福禄禅離電雷零霧露企伎危喜器基奇嬉寄岐希幾忌揮机旗既期棋棄機帰毅気汽祈季稀紀徽規記貴起軌輝飢騎鬼偽儀宜戯技擬欺犠疑祇義蟻誼議菊喫詰却客脚虐逆丘久休及吸宮弓急救朽求汲泣灸球究窮級糾給旧牛去居巨拒拠挙虚許距魚御漁",
-            "訴阻遡鼠僧創双叢倉喪壮奏爽宋層想捜掃挿操早曹巣槍槽漕燥争相窓総綜草荘葬藻装走送遭霜騒像増憎臓蔵贈造促側則即息束測足速俗属賊族続卒袖其揃存孫尊損村遜他多太汰妥惰打舵駄体堆対耐帯待怠態替泰滞胎腿袋貸退逮隊代台大第題滝卓宅択拓沢濯託濁諾但達奪脱棚谷狸樽誰丹単嘆坦担探淡炭短端胆誕鍛団壇弾断暖段男談値知地恥智池痴稚置致遅築畜竹蓄逐秩窒茶着中仲宙忠抽昼柱注虫衷鋳駐著貯丁兆帳庁弔張彫徴懲挑朝潮町眺聴脹腸蝶調超跳長頂鳥勅直朕珍賃鎮陳津墜追痛通塚漬坪釣亭低停偵剃貞呈堤定帝底庭廷弟抵提程締艇訂諦蹄逓邸泥摘滴的笛適哲徹撤迭鉄典填天展店添転点伝殿田電吐塗斗渡登途都努度土奴怒倒党冬凍刀唐塔島悼投搭東桃棟盗湯灯当痘等答筒糖統到董蕩藤討豆踏逃透陶頭騰闘働動同堂導洞瞳童道銅峠匿得徳特督篤毒独読凸突届屯豚曇鈍",
-            "奈那内謎灘鍋南軟難二尼弐肉日入乳尿任妊忍認熱年念捻粘燃悩濃納能脳農把覇波派破婆馬俳廃拝排敗杯背肺輩配倍培媒梅買売賠陪伯拍泊白舶薄迫漠爆縛麦箱畑八鉢発髪伐罰抜閥伴判半反帆搬板版犯班畔繁般藩販範煩頒飯晩番盤蛮卑否妃彼悲扉批披比泌疲皮碑秘罷肥被費避非飛備尾微眉美鼻匹必筆姫百表評苗秒病品貧頻敏瓶不付夫婦富布府怖扶敷普浮父符腐膚譜負賦赴附侮武舞部封風伏副復幅服福腹複覆払沸仏物粉紛雰文聞丙併兵塀幣平弊柄並閉陛米壁癖別偏変片篇編辺返遍便勉弁保舗捕歩補穂募墓慕母簿倣俸包報奉宝峰崩抱放方朋法泡砲縫胞芳褒訪豊邦飽乏亡傍坊妨帽忘忙房暴望某棒冒紡膨謀貌貿防北僕墨撲朴牧没堀本翻凡盆"
-        ],
-        14: [
-            "徳稲菊嶋菅根福綾嘉歌管精製説聡総増蔵造像態対端徴嫡暢肇綴適鉄模舞暮膜慢漫網紋様領緑瑠歴連練凶共叫喬境峡強恐恭挟教橋況狂狭矯胸脅興郷鏡響驚仰凝暁業局曲極玉勤均巾錦斤欣欽緊菌襟謹近金吟銀",
-            "摩磨魔麻埋妹枚毎幕膜枕又抹末繭万慢満漫味未魅岬密蜜脈民眠務夢無矛霧娘名命明盟迷銘鳴滅免綿面模茂妄毛猛盲網耗木黙目戻問紋門夜野矢厄役約薬訳躍柳愉油癒諭輸唯優勇友幽悠憂有猶由裕誘遊郵雄融与誉預幼妖容庸揚揺擁曜様洋溶用窯羊葉要謡踊陽養抑欲浴翌翼羅裸来頼雷絡落酪乱卵嵐欄濫藍蘭覧利吏履李梨理裏里離陸律率立略流留粒隆竜龍侶慮旅虜了亮僚両料涼猟療糧良量陵領力緑倫林臨輪隣瑠塁涙累類令例冷励礼鈴隷零霊麗齢暦歴列劣烈裂廉恋練連錬炉路露労廊朗楼浪漏老郎六録論和話賄脇惑枠湾腕"
-        ],
-        15: [
-            "樋広増輝慶賢駒賜質趣潤醇遵賞憧震影縁鋭閲横稼餓確潟褐歓緩器儀戯擬窮墟勲慶憬稽潔権憲検謙顕請諸線談調適敵徹踏熱練論",
-            "慰緯遺壱逸芋陰隠韻右宇羽雨渦浦運雲営詠影鋭衛益液駅悦越謁閲円延沿炎宴援園演遠鉛塩汚凹央奥往応押横欧殴王翁黄沖億屋憶乙卸恩温穏音化仮何価佳加可嘉夏嫁家寡科暇果架歌河火禍稼箇花荷華菓課貨過蚊我画芽賀雅餓介会解回塊壊快怪悔懐戒拐改械海灰界皆絵開階貝劾外害崖慨概該街垣嚇各拡格核殻獲確穫覚角隔閣学岳楽額顎掛潟括活喝渇滑褐轄"
-        ],
-        16: [
-            "橘橋横樹機龍竜薫賢興鋼錯餐儒獣縦親静整積選操曇濃薄繁避壁磨麺融頼隣歴録館学器激県憲験興築燈薬輸",
-            "株刈乾勘患感歓汗漢甘監看管簡緩缶肝艦観貫還鑑間閑関陥韓館丸含岸眼岩頑顔願企伎危喜器基奇嬉寄岐希幾忌揮机旗既期棋棄機帰毅気汽祈季稀紀徽規記貴起軌輝飢騎鬼偽儀宜戯技擬欺犠疑祇義蟻誼議菊喫詰却客脚虐逆丘久休及吸宮弓急救朽求汲泣灸球究窮級糾給旧牛去居巨拒拠挙虚許距魚御漁凶共叫喬境峡強恐恭挟教橋況狂狭矯胸脅興郷鏡響驚仰凝暁業局曲極玉勤均巾錦斤欣欽緊菌襟謹近金吟銀"
-        ],
-        17: ["遠沢滝千葉優講謝謙購懇擦繊霜聴鍋翼療齢環韓館擬償礁縮績総鍛聴翼曖臆韓館擬謹謙鍵購懇擦繊霜聴鍋翼療齢"],
-        18: ["織新田野村浜藤観顔騎鏡簡職礎騒贈題鎮闘難藩翻繭離類糧額顎曜礼観顔騎鏡簡職礎騒贈題鎮闘難藩翻繭離類糧額顎曜礼"],
-        19: ["関瀬鏡願繰警鯨識贈懲爆譜簿霧離麗羅響獣瀬藤藩爆霧願繰警鯨識贈懲爆譜簿霧離麗羅"],
-        20: ["滝厳懸競護釈譲醸籍騰党竇飄魔露議競護醸鐘騰露厳懸競護釈譲醸籍騰党竇飄魔露"],
-        21: ["桜鶴顧護魔躍蘭欄覧艦顧鶴魔躍露桜鶴顧護魔躍蘭欄覧"],
-        22: ["長谷川鑑歓驚襲権響摂読囊彎鑑驚襲響摂鑑歓驚襲権響摂読囊彎"],
-        23: ["清水顕験恋変顕験恋変"],
-        24: ["鷹鱗譲醸鷹鱗"],
-        25: ["観鬱籬観"],
-        29: ["鬱"]
-    };
+    // 1. 書道・筆致基準の清音かな辞書（濁点+2・半濁点+1はNFD正規化で自動計算）
+    const KANA_BASE = Object.freeze({
+        'し':1, 'つ':1, 'へ':1, 'り':2, 'の':2, 'ん':2, 'ー':1, '・':0,
+        'ノ':1, 'ヘ':1, 'レ':1, 'ン':2, 'っ':1, 'ッ':1,
+        'い':2, 'う':2, 'く':2, 'こ':2, 'て':2, 'と':2, 'ひ':2, 'め':2, 'ろ':2,
+        'イ':2, 'カ':2, 'キ':2, 'ク':2, 'コ':2, 'ス':2, 'セ':2, 'ソ':2, 'ト':2, 'ニ':2, 'ヌ':2, 'ハ':2, 'ヒ':2, 'フ':2, 'マ':2, 'ム':2, 'メ':2, 'ヤ':2, 'ユ':2, 'ラ':2, 'リ':2, 'ル':2, 'ワ':2,
+        'ぃ':2, 'ぅ':2, 'ぇ':3, 'ぉ':4, 'ゃ':3, 'ゅ':3, 'ょ':3, 'ゎ':3,
+        'ィ':2, 'ゥ':3, 'ェ':3, 'ォ':3, 'ャ':2, 'ュ':2, 'ョ':3, 'ヮ':2,
+        'あ':3, 'え':3, 'か':3, 'け':3, 'さ':3, 'す':3, 'せ':3, 'そ':3, 'ち':3, 'に':3, 'ぬ':3, 'は':4, 'み':3, 'む':4, 'も':3, 'や':3, 'ゆ':3, 'よ':3, 'ら':3, 'る':3, 'れ':3, 'わ':3, 'を':4,
+        'ア':2, 'ウ':3, 'エ':3, 'オ':3, 'ケ':3, 'サ':3, 'シ':3, 'タ':3, 'チ':3, 'ツ':3, 'テ':3, 'ナ':2, 'ネ':4, 'ホ':4, 'ミ':3, 'モ':3, 'ヨ':3, 'ロ':3, 'ヲ':3, 'ぁ':3, 'ァ':2,
+        'き':4, 'た':4, 'な':5, 'ね':4, 'ふ':4, 'ほ':5, 'ま':4, 'お':4
+    });
 
-    const strokeMap = Object.create(null);
-    for (const [strokesStr, chunks] of Object.entries(RAW_STROKE_GROUPS)) {
-        const count = Number(strokesStr);
-        for (const chunk of chunks) {
-            for (const char of Array.from(chunk)) {
-                if (strokeMap[char] === undefined) {
-                    strokeMap[char] = count;
-                }
+    function resolveKanaStroke(ch) {
+        if (Object.prototype.hasOwnProperty.call(KANA_BASE, ch)) {
+            return KANA_BASE[ch];
+        }
+        const nfd = ch.normalize('NFD');
+        if (nfd.length > 1 && Object.prototype.hasOwnProperty.call(KANA_BASE, nfd)) {
+            let total = KANA_BASE[nfd];
+            for (let i = 1; i < nfd.length; i++) {
+                if (nfd[i] === '\u3099') total += 2;      // 濁点（゛）は +2画
+                else if (nfd[i] === '\u309A') total += 1; // 半濁点（゜）は +1画
             }
+            return total;
         }
+        return null;
     }
-    Object.freeze(strokeMap);
-
-    const VALID_NAME_REGEX = /^[\u3041-\u3096\u309D\u309E\u30A1-\u30FA\u30FC-\u30FE\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\u3005]+$/;
-
-    function calculateNameStrokes(nameStr) {
-        const chars = Array.from(nameStr);
-        let total = 0;
-        let prevStroke = 0;
-        const unknownChars = [];
-
-        for (let i = 0; i < chars.length; i++) {
-            const ch = chars[i];
-            if (ch === '々' || ch === 'ゝ' || ch === 'ゞ' || ch === 'ヽ' || ch === 'ヾ') {
-                if (prevStroke === 0) {
-                    return { error: `先頭に踊り字「${ch}」は使用できません。` };
-                }
-                total += prevStroke;
-            } else {
-                const s = strokeMap[ch];
-                if (typeof s !== 'number') {
-                    unknownChars.push(ch);
-                } else {
-                    total += s;
-                    prevStroke = s;
-                }
-            }
-        }
-
-        if (unknownChars.length > 0) {
-            return { error: `未登録の漢字が含まれています（${unknownChars.join('、')}）。` };
-        }
-        return { total };
-    }
-
-    function computeVolatileSeed(text) {
-        let hash = 5381;
-        for (let i = 0; i < text.length; i++) {
-            hash = ((hash << 5) + hash) + text.charCodeAt(i);
-        }
-        return (hash >>> 0);
-    }
-
-    function generateFortuneMessage(seed, totalStrokes, birthNum) {
-        const s1 = seed % 4;
-        const s2 = (seed >>> 2) % 4;
-        const s3 = (seed >>> 4) % 4;
-
-        const part1 = [
-            `固有特性値は${totalStrokes}画をベースとし、`,
-            `算出された総格${totalStrokes}画の波動エネルギーは、`,
-            `固有識別コード${totalStrokes}画に秘められた性質は、`,
-            `基盤データ${totalStrokes}画から解析された資質は、`
-        ];
-
-        const part2 = [
-            `入力された名前の構成から「完璧な調和」とスマートな処理能力を示しています。`,
-            `名前の文字列が持つ独自の周波数が、リスクを事前に察知する強力な直感力を生み出しています。`,
-            `文字の組み合わせそのものが独立心と強い自己防衛力を引き出す特殊な配列です。`,
-            `内に秘めた爆発的なポテンシャルと、堅実な資産防衛のバランスが非常に上手く取れています。`
-        ];
-
-        const part3 = [
-            `数秘術から導かれた誕生数【${birthNum}】の加護により、困難な局面でも常に最適なルートを選び取る適性が極めて高く現れています。`,
-            `誕生数【${birthNum}】との複合解析の結果、地道な努力が大きな成果の拡大へと繋がる、確実性の高い防衛戦術がベストです。`,
-            `天命数【${birthNum}】が示す未来予測では、自分の直感を信じて行動することで、周囲を圧倒する成功と自立を掴み取る運命にあります。`,
-            `運命数【${birthNum}】の防衛シールドがアクティブになっており、予期せぬトラブルをすべてチャンスへと変換する強運を持っています。`
-        ];
-
-        return "【解析結果】" + part1[s1] + part2[s2] + part3[s3];
-    }
-
-    function showError(msg) {
-        const errBox = document.getElementById('errorBox');
-        errBox.textContent = msg;
-        errBox.style.display = 'block';
-        document.getElementById('secureOutput').style.display = 'none';
-    }
-
-    function executeSecureFortune() {
-        const errBox = document.getElementById('errorBox');
-        errBox.style.display = 'none';
-
-        const rawLast = document.getElementById('nodeLastName').value.trim();
-        const rawFirst = document.getElementById('nodeFirstName').value.trim();
-        const rawBirth = document.getElementById('nodeBirthday').value;
-
-        if (!rawLast || !rawFirst || !rawBirth) {
-            showError("苗字・名前・生年月日をすべて入力してください。");
-            return;
-        }
-        if (!VALID_NAME_REGEX.test(rawLast) || !VALID_NAME_REGEX.test(rawFirst)) {
-            showError("使用できない文字が含まれています。漢字・ひらがな・カタカナで入力してください。");
-            return;
-        }
-
-        const lastResult = calculateNameStrokes(rawLast);
-        if (lastResult.error) { showError("苗字エラー: " + lastResult.error); return; }
-
-        const firstResult = calculateNameStrokes(rawFirst);
-        if (firstResult.error) { showError("名前エラー: " + firstResult.error); return; }
-
-        const grandTotal = lastResult.total + firstResult.total;
-
-        const birthDigits = rawBirth.replace(/[^0-9]/g, '');
-        let sum = 0;
-        for (const d of birthDigits) { sum += Number(d); }
-        while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
-            sum = String(sum).split('').reduce((acc, cur) => acc + Number(cur), 0);
-        }
-
-        const volatileSeed = computeVolatileSeed(`${rawLast}:${rawFirst}:${rawBirth}`);
-        const resultMsg = generateFortuneMessage(volatileSeed, grandTotal, sum);
-
-        executionCount += 1;
-        document.getElementById('execCounter').textContent = String(executionCount);
-
-        document.getElementById('outTitle').textContent = "🛡️ 鑑定完了（ゼロ・データ保持モード）";
-        document.getElementById('outMeta').textContent = `総格: ${grandTotal}画（苗字 ${lastResult.total}画 ＋ 名前 ${firstResult.total}画） / 誕生数: 【${sum}】`;
-        document.getElementById('outDesc').textContent = resultMsg;
-        document.getElementById('secureOutput').style.display = 'block';
-    }
-
-    document.getElementById('execBtn').addEventListener('click', executeSecureFortune);
-})();
-</script>
-</body>
-</html>
